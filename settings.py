@@ -21,6 +21,8 @@ DB_PORT = os.getenv('DB_PORT', 5432)
 
 PROMETHEUS_MULTIPROC_DIR = os.getenv("PROMETHEUS_MULTIPROC_DIR", None)
 
+EXPLORER_API_BASE_URL = "https://explorer.galadriel.com/api/v2/"
+
 
 def is_production():
     return ENVIRONMENT == "production"

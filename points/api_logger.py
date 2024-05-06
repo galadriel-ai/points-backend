@@ -2,16 +2,16 @@ import logging
 import os
 from typing import Optional
 
-import settings
-from uuid import UUID
 from pythonjsonlogger import jsonlogger
+
+import settings
 
 LOGGING_MESSAGE_FORMAT = "%(asctime)s %(name)-12s %(levelname)s %(message)s"
 
 logger: Optional[any] = None
 
 
-def get(agent_id: UUID = None):
+def get():
     global logger
     if logger:
         return logger
@@ -26,8 +26,6 @@ def get(agent_id: UUID = None):
     apply_default_formatter(file_handler)
     apply_default_formatter(console_handler)
 
-    if agent_id:
-        logger = logging.LoggerAdapter(logger, {"agent_id": str(agent_id)})
     return logger
 
 

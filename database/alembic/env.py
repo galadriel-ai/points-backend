@@ -17,8 +17,21 @@ target_metadata = models.Base.metadata
 
 
 # this function should return the connection and metadata for your target database
+def get_urls():
+    url = "postgresql://{}:{}@{}:{}/{}"
+    return [
+        url.format(
+            settings.DB_USER,
+            settings.DB_PASSWORD,
+            settings.DB_HOST,
+            settings.DB_PORT,
+            settings.DB_DATABASE
+        )
+    ]
+
+
 def get_url():
-    return "postgresql://postgres:passw0rd@localhost:5442/agent"
+    return get_urls()[0]
 
 
 config = context.config
@@ -80,7 +93,6 @@ def run_migrations_online():
                 context.run_migrations()
 
 
-
 # customize the naming convention for version files
 def my_naming_convention_function(rev, _):
     # format the revision number with leading zeros
@@ -102,18 +114,6 @@ def process_revision_directives(context, _, directives):
 
     migration_script.rev_id = '{0:012}'.format(new_rev_id)
 
-
-def get_urls():
-    url = "postgresql://{}:{}@{}:{}/{}"
-    return [
-        url.format(
-            settings.DB_USER,
-            settings.DB_PASSWORD,
-            settings.DB_HOST,
-            settings.DB_PORT,
-            settings.DB_DATABASE
-        )
-    ]
 
 if context.is_offline_mode():
     run_migrations_offline()

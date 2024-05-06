@@ -38,6 +38,6 @@ async def endpoint(
         leaderboard_users=users,
         recently_joined_users=[UserListItem(
             x_name=u.x_username,
-            points=str(u.points),
+            points="0",
         ) for u in recently_joined],
     )
