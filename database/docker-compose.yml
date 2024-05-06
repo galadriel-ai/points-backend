@@ -1,6 +1,6 @@
 services:
   database3:
-    image: "postgres:16.2"
+    image: "postgres:15"
     container_name: "points_postgres"
     environment:
       - POSTGRES_DB=points

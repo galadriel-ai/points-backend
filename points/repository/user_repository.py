@@ -11,6 +11,7 @@ INSERT INTO user_profile (
     id,
     x_username,
     email,
+    wallet_address,
     created_at,
     last_updated_at
 )
@@ -18,16 +19,29 @@ VALUES (
     :id,
     :x_username,
     :email,
+    :wallet_address,
     :created_at,
     :last_updated_at
 );
 """
 
+SQL_UPDATE_WALLET_ADDRESS = """
+UPDATE user_profile 
+SET 
+    wallet_address = :wallet_address,
+    last_updated_at = :last_updated_at
+WHERE
+    email = :email;
+"""
+
 SQL_GET_MOST_RECENT = """
 SELECT 
     email,
-    x_username
-FROM user_profile ORDER BY id DESC LIMIT :count;
+    x_username,
+    wallet_address
+FROM user_profile
+ORDER BY id DESC
+LIMIT :count;
 """
 
 
@@ -38,13 +52,24 @@ class UserRepositoryPsql:
     def insert(self, user: User):
         data = {
             "id": utils.generate_uuid(),
-            "email": user.email,
+            "email": user.email.lower(),
             "x_username": user.x_username,
+            "wallet_address": user.wallet_address,
             "created_at": utils.now(),
             "last_updated_at": utils.now(),
         }
         with self.session_maker() as session:
             session.execute(text(SQL_INSERT_USER), data)
+            session.commit()
+
+    def update_wallet_address(self, email: str, wallet_address: str):
+        data = {
+            "email": email.lower(),
+            "wallet_address": wallet_address,
+            "last_updated_at": utils.now(),
+        }
+        with self.session_maker() as session:
+            session.execute(text(SQL_UPDATE_WALLET_ADDRESS), data)
             session.commit()
 
     def get_recently_joined(self, count: int) -> List[User]:
@@ -58,6 +83,6 @@ class UserRepositoryPsql:
                 users.append(User(
                     x_username=row.x_username,
                     email=row.email,
-                    points=0,
+                    wallet_address=row.wallet_address,
                 ))
             return users

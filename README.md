@@ -24,3 +24,8 @@ alembic revision --autogenerate -m "Description"
 alembic downgrade -1
 ```
 
+
+### Run unit tests
+```bash
+python -m pytest tests/unit
+```
