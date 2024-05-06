@@ -12,7 +12,6 @@ class DashboardRequest(BaseModel):
 
 
 class UserListItem(BaseModel):
-    name: str = Field(description="User name")
     x_name: str = Field(description="Users x handle name")
     points: str = Field(description="Amount of points user has")
 
