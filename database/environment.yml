@@ -1,0 +1,9 @@
+name: agent-api-database
+dependencies:
+  - python=3.9
+  - pip=21.2.4
+  - pip:
+    - python-dotenv==0.17.1
+    - SQLAlchemy==1.4.11
+    - alembic==1.6.2
+    - psycopg2-binary==2.9.3

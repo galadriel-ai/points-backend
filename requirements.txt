@@ -10,3 +10,7 @@ pytest==8.2.0
 pytz==2024.1
 starlette==0.37.2
 pydantic==2.7.1
+SQLAlchemy==2.0.30
+alembic==1.13.1
+psycopg2-binary==2.9.9
+uuid7==0.1.0
