@@ -6,6 +6,7 @@ from starlette.responses import PlainTextResponse
 
 import settings
 from points import api_logger
+from points.repository import connection
 from points.routers import main_router
 from points.routers import routing_utils
 from points.service.exception_handlers.exception_handlers import (
@@ -21,6 +22,7 @@ from points.service.monitoring.prometheus_middleware import PrometheusMiddleware
 logger = api_logger.get()
 
 app = FastAPI()
+connection.init_default()
 
 app.include_router(
     main_router.router,
