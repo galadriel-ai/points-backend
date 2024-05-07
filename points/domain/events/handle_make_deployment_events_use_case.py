@@ -19,7 +19,7 @@ async def execute(
         if not user.wallet_address:
             # Should not happen
             continue
-        await _handle_event_make_tx(
+        await _handle_event(
             user,
             event_repository,
             explorer_repository
@@ -27,7 +27,7 @@ async def execute(
         await asyncio.sleep(1)
 
 
-async def _handle_event_make_tx(
+async def _handle_event(
     user: EventUser,
     event_repository: EventRepositoryPsql,
     explorer_repository: ExplorerRepositoryHTTP
