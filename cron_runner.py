@@ -37,6 +37,7 @@ async def _cron_runner(
             time.sleep(timeout)
         except Exception as e:
             logger.error(f"{job_name} job failed, restarting", exc_info=True)
+            time.sleep(timeout)
 
 
 async def _run_chain_usage_job():

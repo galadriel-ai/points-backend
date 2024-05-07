@@ -23,6 +23,8 @@ PROMETHEUS_MULTIPROC_DIR = os.getenv("PROMETHEUS_MULTIPROC_DIR", None)
 
 EXPLORER_API_BASE_URL = "https://explorer.galadriel.com/api/v2/"
 
+FAUCET_ADDRESS = os.getenv("FAUCET_ADDRESS", "0x2AfAcDdd5218943CfB52D4B43205bB96dD87A165")
+
 
 def is_production():
     return ENVIRONMENT == "production"
