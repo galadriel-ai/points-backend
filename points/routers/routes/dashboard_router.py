@@ -6,7 +6,7 @@ from points.service.dashboard.entities import DashboardRequest
 from points.service.dashboard.entities import DashboardResponse
 from points.service.dashboard.entities import UserListItem
 
-TAG = "Router"
+TAG = "Dashboard"
 router = APIRouter()
 router.tags = [TAG]
 
