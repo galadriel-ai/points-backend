@@ -1,7 +1,7 @@
 """Change user_profile table email to x_id
 
-Revision ID: 000000000005
-Revises: 000000000004
+Revision ID: 000000000006
+Revises: 000000000005
 Create Date: 2024-05-08 15:54:38.083897
 
 """
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '000000000005'
-down_revision = '000000000004'
+revision = '000000000006'
+down_revision = '000000000005'
 branch_labels = None
 depends_on = None
 
