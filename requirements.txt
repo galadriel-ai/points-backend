@@ -17,4 +17,6 @@ SQLAlchemy==2.0.30
 alembic==1.13.1
 psycopg2-binary==2.9.9
 uuid7==0.1.0
+fastapi-sso==0.14.2
 siwe==4.0.0
+python-jose==3.3.0

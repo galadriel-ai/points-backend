@@ -1,7 +1,11 @@
 from fastapi import APIRouter
+from fastapi import Depends
+from starlette.responses import JSONResponse
 
+from points.domain.dashboard.entities import User
 from points.repository import connection
 from points.repository.user_repository import UserRepositoryPsql
+from points.service.auth import access_token_service
 from points.service.dashboard.entities import DashboardRequest
 from points.service.dashboard.entities import DashboardResponse
 from points.service.dashboard.entities import UserListItem
@@ -41,3 +45,14 @@ async def endpoint(
             points="0",
         ) for u in recently_joined],
     )
+
+
+@router.get(
+    "/v1/dashboard/user",
+    response_model=DashboardResponse
+)
+async def endpoint_user(
+    user: User = Depends(
+        access_token_service.get_user_from_access_token)
+):
+    return JSONResponse({"x_username": user.x_username})
