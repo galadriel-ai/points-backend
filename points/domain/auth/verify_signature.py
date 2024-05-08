@@ -1,4 +1,5 @@
 from siwe import SiweMessage
+from eth_utils import to_checksum_address
 
 from points.repository.auth_repository import AuthRepositoryPsql
 
@@ -22,6 +23,7 @@ def execute(
     wallet_address: str,
     auth_repository: AuthRepositoryPsql
 ) -> bool:
+    wallet_address = to_checksum_address(wallet_address)
     message_components = auth_repository.get_sign_message_components(wallet_address)
     message = MESSAGE_TEMPLATE.format(
         DOMAIN=DOMAIN,
@@ -31,10 +33,8 @@ def execute(
         NONCE=message_components.nonce,
         ISSUED_AT=message_components.issued_at
     )
-    # TODO: remove prints
-    print(message)
+
     siwe_message = SiweMessage.from_message(message=message)
-    print("siwe_message:", siwe_message)
 
     try:
         siwe_message.verify(signature, nonce=message_components.nonce, domain=DOMAIN)

@@ -13,6 +13,11 @@ def test_verify_signature():
     assert result
 
 
+def test_verify_signature_lower_case_address():
+    result = verify_signature.execute(SIGNATURE, WALLET_ADDRESS.lower(), auth_repository)
+    assert result
+
+
 def test_verify_signature_wrong_address():
     result = verify_signature.execute(
         SIGNATURE, WALLET_ADDRESS_INCORRECT, auth_repository)
