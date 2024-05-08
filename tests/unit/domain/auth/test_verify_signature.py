@@ -1,5 +1,5 @@
 from points.domain.auth import verify_signature
-from points.repository.auth_repository import AuthRepositoryPsqlMock
+from tests.unit.mocks.mock_auth_repository import AuthRepositoryPsqlMock
 
 auth_repository = AuthRepositoryPsqlMock()
 
@@ -14,7 +14,8 @@ def test_verify_signature():
 
 
 def test_verify_signature_lower_case_address():
-    result = verify_signature.execute(SIGNATURE, WALLET_ADDRESS.lower(), auth_repository)
+    result = verify_signature.execute(
+        SIGNATURE, WALLET_ADDRESS.lower(), auth_repository)
     assert result
 
 

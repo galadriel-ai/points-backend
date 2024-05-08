@@ -6,29 +6,8 @@ from sqlalchemy.orm import sessionmaker
 from points.domain.auth.entities import SignMessageComponents
 from points.repository import utils
 
-
-class AuthRepositoryPsqlMock:
-
-    def insert_sign_message_components(
-        self,
-        wallet_address: str,
-        nonce: str,
-        issued_at: str,
-    ) -> bool:
-        return True
-
-    def get_sign_message_components(
-        self,
-        wallet_address: str
-    ) -> Optional[SignMessageComponents]:
-        return SignMessageComponents(
-            nonce="cqaakoZsXxz",
-            issued_at="2024-05-06T21:01:02.000Z"
-        )
-
-
 SQL_INSERT_CHALLENGE = """
-INSERT INTO eth_signin_challenges (
+INSERT INTO eth_signin_challenge (
     wallet_address,
     nonce,
     issued_at,
@@ -47,7 +26,7 @@ DO UPDATE SET nonce = :nonce, issued_at = :issued_at, last_updated_at = :last_up
 
 SQL_GET_CHALLENGE = """
 SELECT nonce, issued_at 
-FROM eth_signin_challenges 
+FROM eth_signin_challenge 
 WHERE wallet_address = :wallet_address
 """
 

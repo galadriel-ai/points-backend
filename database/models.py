@@ -43,7 +43,7 @@ class QuestEvent(Base):
 
 
 class EthSignInChallenges(Base):
-    __tablename__ = "eth_signin_challenges"
+    __tablename__ = "eth_signin_challenge"
     wallet_address = Column(String, primary_key=True, nullable=False)
     nonce = Column(String, nullable=False, unique=False)
     issued_at = Column(String, nullable=False, unique=False)

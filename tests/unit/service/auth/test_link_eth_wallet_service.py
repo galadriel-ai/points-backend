@@ -2,11 +2,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from points.repository.auth_repository import AuthRepositoryPsqlMock
 from points.service.auth import link_eth_wallet_service as service
 from points.service.auth.entities import LinkEthWalletRequest
 from points.service.auth.entities import LinkEthWalletResponse
 from points.service.error_responses import ValidationAPIError
+from tests.unit.mocks.mock_auth_repository import AuthRepositoryPsqlMock
 
 
 def setup_function():

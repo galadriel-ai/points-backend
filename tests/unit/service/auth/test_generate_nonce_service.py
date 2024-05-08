@@ -2,11 +2,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from points.repository.auth_repository import AuthRepositoryPsqlMock
 from points.service.auth import generate_nonce_service as service
 from points.service.auth.entities import GenerateNonceRequest
 from points.service.auth.entities import GenerateNonceResponse
 from points.service.error_responses import ValidationAPIError
+from tests.unit.mocks.mock_auth_repository import AuthRepositoryPsqlMock
 
 NONCE = "abcdefg"
 ISSUED_AT = "mock-time00"
