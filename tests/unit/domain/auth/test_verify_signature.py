@@ -1,7 +1,7 @@
 from points.domain.auth import verify_signature
-from points.repository.auth_repository import AuthRepositoryPsql
+from points.repository.auth_repository import AuthRepositoryPsqlMock
 
-auth_repository = AuthRepositoryPsql()
+auth_repository = AuthRepositoryPsqlMock()
 
 SIGNATURE = "0x8b3b8bd7fe7eade3680460835489fd375e6bbc489413b0287e1d9669b4a5d49610c18c005062080bf48b08a5e7e4c147c1cdd4d88ce86a2294a70c1ee061a53e1b"
 WALLET_ADDRESS = "0x3FABFC6ae7A14c9abBad96Ac2704a7F8D555a079"

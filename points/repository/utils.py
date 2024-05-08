@@ -9,4 +9,7 @@ def generate_uuid() -> UUID:
 
 
 def now() -> datetime:
-    return datetime.datetime.now(datetime.UTC)
+    try:
+        return datetime.datetime.now(datetime.UTC)
+    except AttributeError:
+        return datetime.datetime.utcnow()

@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from points.repository.auth_repository import AuthRepositoryPsql
+from points.repository.auth_repository import AuthRepositoryPsqlMock
 from points.service.auth import link_eth_wallet_service as service
 from points.service.auth.entities import LinkEthWalletRequest
 from points.service.auth.entities import LinkEthWalletResponse
@@ -19,7 +19,7 @@ def test_link_eth_wallet():
         signature="0xMock1",
         wallet_address="0x3FABFC6ae7A14c9abBad96Ac2704a7F8D555a079"
     )
-    auth_repository = AuthRepositoryPsql()
+    auth_repository = AuthRepositoryPsqlMock()
 
     result = service.execute(request, auth_repository)
     assert result == LinkEthWalletResponse(success=True)
@@ -35,7 +35,7 @@ def test_link_eth_wallet_invalid_wallet_address():
         signature="0xMock1",
         wallet_address="0xMock2"
     )
-    auth_repository = AuthRepositoryPsql()
+    auth_repository = AuthRepositoryPsqlMock()
 
     with pytest.raises(ValidationAPIError):
         service.execute(request, auth_repository)

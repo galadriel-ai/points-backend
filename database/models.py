@@ -40,3 +40,13 @@ class QuestEvent(Base):
 
     created_at = Column(DateTime, nullable=False)
     last_updated_at = Column(DateTime, nullable=False)
+
+
+class EthSignInChallenges(Base):
+    __tablename__ = "eth_signin_challenges"
+    wallet_address = Column(String, primary_key=True, nullable=False)
+    nonce = Column(String, nullable=False, unique=False)
+    issued_at = Column(String, nullable=False, unique=False)
+
+    created_at = Column(DateTime, nullable=False)
+    last_updated_at = Column(DateTime, nullable=False)

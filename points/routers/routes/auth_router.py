@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from points.repository import connection
 from points.repository.auth_repository import AuthRepositoryPsql
 from points.service.auth import generate_nonce_service
 from points.service.auth import link_eth_wallet_service
@@ -12,8 +13,6 @@ TAG = "Auth"
 router = APIRouter()
 router.tags = [TAG]
 
-auth_repository = AuthRepositoryPsql()
-
 
 @router.post(
     "/v1/auth/eth/nonce",
@@ -22,6 +21,7 @@ auth_repository = AuthRepositoryPsql()
 async def generate_nonce_endpoint(
     request: GenerateNonceRequest,
 ) -> GenerateNonceResponse:
+    auth_repository = AuthRepositoryPsql(connection.get_session_maker())
     return generate_nonce_service.execute(request, auth_repository)
 
 
@@ -32,4 +32,5 @@ async def generate_nonce_endpoint(
 async def link_eth_wallet_endpoint(
     request: LinkEthWalletRequest
 ) -> LinkEthWalletResponse:
+    auth_repository = AuthRepositoryPsql(connection.get_session_maker())
     return link_eth_wallet_service.execute(request, auth_repository)

@@ -19,4 +19,5 @@ def execute(
         wallet_address=request.wallet_address,
         auth_repository=auth_repository,
     )
+    # TODO: store the wallet address under some account after we have twitter login
     return LinkEthWalletResponse(success=result)
