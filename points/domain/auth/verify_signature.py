@@ -34,11 +34,10 @@ def execute(
         ISSUED_AT=message_components.issued_at
     )
 
-    siwe_message = SiweMessage.from_message(message=message)
-
     try:
+        siwe_message = SiweMessage.from_message(message=message)
         siwe_message.verify(signature, nonce=message_components.nonce, domain=DOMAIN)
         return True
     except Exception as exc:
-        print("Failed to verify signature, exc:", exc)
+        print(f"Failed to verify signature for {wallet_address}, exc:", exc)
         return False
