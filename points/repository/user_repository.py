@@ -1,4 +1,5 @@
 from typing import List
+from typing import Optional
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
@@ -9,20 +10,30 @@ from points.repository import utils
 SQL_INSERT_USER = """
 INSERT INTO user_profile (
     id,
+    x_id,
     x_username,
-    email,
     wallet_address,
     created_at,
     last_updated_at
 )
 VALUES (
     :id,
+    :x_id,
     :x_username,
-    :email,
     :wallet_address,
     :created_at,
     :last_updated_at
 );
+"""
+
+SQL_GET_BY_X_ID = """
+SELECT 
+    id, 
+    x_id, 
+    x_username, 
+    wallet_address 
+FROM user_profile
+WHERE x_id = :x_id;
 """
 
 SQL_UPDATE_WALLET_ADDRESS = """
@@ -31,12 +42,12 @@ SET
     wallet_address = :wallet_address,
     last_updated_at = :last_updated_at
 WHERE
-    email = :email;
+    x_id = :x_id;
 """
 
 SQL_GET_MOST_RECENT = """
 SELECT 
-    email,
+    x_id,
     x_username,
     wallet_address
 FROM user_profile
@@ -49,10 +60,10 @@ class UserRepositoryPsql:
     def __init__(self, session_maker: sessionmaker):
         self.session_maker = session_maker
 
-    def insert(self, user: User):
+    def insert(self, user: User) -> None:
         data = {
             "id": utils.generate_uuid(),
-            "email": user.email.lower(),
+            "x_id": user.x_id,
             "x_username": user.x_username,
             "wallet_address": user.wallet_address,
             "created_at": utils.now(),
@@ -62,9 +73,23 @@ class UserRepositoryPsql:
             session.execute(text(SQL_INSERT_USER), data)
             session.commit()
 
-    def update_wallet_address(self, email: str, wallet_address: str):
+    def get_by_x_id(self, x_id: str) -> Optional[User]:
         data = {
-            "email": email.lower(),
+            "x_id": x_id,
+        }
+        with self.session_maker() as session:
+            row = session.execute(text(SQL_GET_BY_X_ID), data).first()
+            if row:
+                return User(
+                    x_id=row.x_id,
+                    x_username=row.x_username,
+                    wallet_address=row.wallet_address,
+                )
+        return None
+
+    def update_wallet_address(self, x_id: str, wallet_address: str):
+        data = {
+            "x_id": x_id,
             "wallet_address": wallet_address,
             "last_updated_at": utils.now(),
         }
@@ -81,8 +106,8 @@ class UserRepositoryPsql:
             users = []
             for row in rows:
                 users.append(User(
+                    x_id=row.x_id,
                     x_username=row.x_username,
-                    email=row.email,
                     wallet_address=row.wallet_address,
                 ))
             return users

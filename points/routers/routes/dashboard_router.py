@@ -1,11 +1,15 @@
 from typing import List
 
 from fastapi import APIRouter
-
-from points.repository import connection
+from fastapi import Depends
 from points.repository.leaderboard_repository import LeaderboardEntry
 from points.repository.leaderboard_repository import LeaderboardRepositoryPsql
 from points.repository.leaderboard_repository import RecentlyJoinedEntry
+from starlette.responses import JSONResponse
+
+from points.domain.dashboard.entities import User
+from points.repository import connection
+from points.service.auth import access_token_service
 from points.service.dashboard.entities import DashboardRequest
 from points.service.dashboard.entities import DashboardResponse
 from points.service.dashboard.entities import LeaderboardItem
@@ -52,3 +56,14 @@ def _map_recently_joined(
             joined_at=str(item.joined_at)
         ))
     return result
+
+
+@router.get(
+    "/v1/dashboard/user",
+    response_model=DashboardResponse
+)
+async def endpoint_user(
+    user: User = Depends(
+        access_token_service.get_user_from_access_token)
+):
+    return JSONResponse({"x_username": user.x_username})

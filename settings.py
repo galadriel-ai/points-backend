@@ -25,6 +25,17 @@ EXPLORER_API_BASE_URL = "https://explorer.galadriel.com/api/v2/"
 
 FAUCET_ADDRESS = os.getenv("FAUCET_ADDRESS", "0x2AfAcDdd5218943CfB52D4B43205bB96dD87A165")
 
+TWITTER_CLIENT_ID = os.getenv("TWITTER_CLIENT_ID")
+TWITTER_CLIENT_SECRET = os.getenv("TWITTER_CLIENT_SECRET")
+
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "default_secret_key")
+
+FRONTEND_AUTH_CALLBACK_URL = os.getenv("FRONTEND_AUTH_CALLBACK_URL", "http://localhost:3000/auth/callback")
+
 
 def is_production():
     return ENVIRONMENT == "production"
+
+
+if not is_production():
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'

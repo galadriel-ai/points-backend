@@ -17,8 +17,9 @@ class UserProfile(Base):
     __tablename__ = "user_profile"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid7)
 
-    email = Column(String, nullable=False, unique=True)
-    x_username = Column(String, nullable=False, unique=True)
+    x_id = Column(String, nullable=False, unique=True)
+    x_username = Column(String, nullable=False, unique=False)
+
     wallet_address = Column(String, nullable=True, unique=False)
 
     created_at = Column(DateTime, nullable=False)

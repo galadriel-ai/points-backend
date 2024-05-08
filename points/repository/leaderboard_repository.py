@@ -39,7 +39,7 @@ DO UPDATE SET points = :points, last_updated_at = :last_updated_at;
 """
 
 SQL_GET_LEADERBOARD = """
-SELECT u.x_username, u.email, u.wallet_address, l.points
+SELECT u.x_id, u.x_username, u.wallet_address, l.points
 FROM leaderboard l
 INNER JOIN user_profile u ON l.user_profile_id = u.id
 ORDER BY l.points DESC
@@ -47,7 +47,7 @@ LIMIT 10;
 """
 
 SQL_GET_RECENTLY_JOINED = """
-SELECT x_username, email, wallet_address, created_at
+SELECT x_id, x_username, wallet_address, created_at
 FROM user_profile
 ORDER BY created_at DESC
 LIMIT 10;
@@ -77,13 +77,13 @@ class LeaderboardRepositoryPsql:
             rows = session.execute(text(SQL_GET_LEADERBOARD))
             for row in rows:
                 user = User(
-                    x_username=row[0],
-                    email=row[1],
-                    wallet_address=row[2],
+                    x_id=row.x_id,
+                    x_username=row.x_username,
+                    wallet_address=row.wallet_address,
                 )
                 result.append(LeaderboardEntry(
                     user=user,
-                    points=row[3]
+                    points=row.points
                 ))
         return result
 
@@ -93,12 +93,12 @@ class LeaderboardRepositoryPsql:
             rows = session.execute(text(SQL_GET_RECENTLY_JOINED))
             for row in rows:
                 user = User(
-                    x_username=row[0],
-                    email=row[1],
-                    wallet_address=row[2],
+                    x_id=row.x_id,
+                    x_username=row.x_username,
+                    wallet_address=row.wallet_address,
                 )
                 result.append(RecentlyJoinedEntry(
                     user=user,
-                    joined_at=row[3]
+                    joined_at=row.created_at
                 ))
         return result
