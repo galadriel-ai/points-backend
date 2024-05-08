@@ -9,13 +9,15 @@ from points.crons import chain_usage_job
 from points.repository import connection
 from points.repository.event_repository import EventRepositoryPsql
 from points.repository.explorer_repository import ExplorerRepositoryHTTP
+from points.repository.leaderboard_repository import LeaderboardRepositoryPsql
 
 logger = api_logger.get()
 
 
 async def start_cron_jobs():
     tasks = [
-        (_run_chain_usage_job, "Chain usage by wallet job", 60)
+        (_run_chain_usage_job, "Chain usage by wallet job", 60),
+        (_run_leaderboard_job, "Leaderboard job", 60),
     ]
 
     await asyncio.gather(*[_cron_runner(*t) for t in tasks])
@@ -44,6 +46,14 @@ async def _run_chain_usage_job():
     event_repository = EventRepositoryPsql(connection.get_session_maker())
     explorer_repository = ExplorerRepositoryHTTP(settings.EXPLORER_API_BASE_URL)
     await chain_usage_job.execute(event_repository, explorer_repository)
+
+
+async def _run_leaderboard_job():
+    event_repository = EventRepositoryPsql(connection.get_session_maker())
+    leaderboard_repository = LeaderboardRepositoryPsql(connection.get_session_maker())
+    total_points = event_repository.get_total_points()
+    for data in total_points:
+        leaderboard_repository.insert_entry(data["user_profile_id"], data["points"])
 
 
 if __name__ == "__main__":

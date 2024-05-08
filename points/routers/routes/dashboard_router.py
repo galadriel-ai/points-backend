@@ -1,10 +1,15 @@
+from typing import List
+
 from fastapi import APIRouter
 
 from points.repository import connection
-from points.repository.user_repository import UserRepositoryPsql
+from points.repository.leaderboard_repository import LeaderboardEntry
+from points.repository.leaderboard_repository import LeaderboardRepositoryPsql
+from points.repository.leaderboard_repository import RecentlyJoinedEntry
 from points.service.dashboard.entities import DashboardRequest
 from points.service.dashboard.entities import DashboardResponse
-from points.service.dashboard.entities import UserListItem
+from points.service.dashboard.entities import LeaderboardItem
+from points.service.dashboard.entities import RecentlyJoinedItem
 
 TAG = "Dashboard"
 router = APIRouter()
@@ -18,26 +23,32 @@ router.tags = [TAG]
 async def endpoint(
     request: DashboardRequest,
 ) -> DashboardResponse:
-    users = [
-        UserListItem(
-            x_name="@mock1",
-            points="5000 XP"
-        ),
-        UserListItem(
-            x_name="@mock2",
-            points="4000 XP"
-        ),
-        UserListItem(
-            x_name="@mock3",
-            points="3000 XP"
-        )
-    ]
-    user_repository = UserRepositoryPsql(connection.get_session_maker())
-    recently_joined = user_repository.get_recently_joined(10)
+    repository = LeaderboardRepositoryPsql(connection.get_session_maker())
+    leaderboard = repository.get_leaderboard()
+    recently_joined = repository.get_recently_joined()
     return DashboardResponse(
-        leaderboard_users=users,
-        recently_joined_users=[UserListItem(
-            x_name=u.x_username,
-            points="0",
-        ) for u in recently_joined],
+        leaderboard_users=_map_leaderboard(leaderboard),
+        recently_joined_users=_map_recently_joined(recently_joined)
     )
+
+
+def _map_leaderboard(leaderboard: List[LeaderboardEntry]) -> List[LeaderboardItem]:
+    result = []
+    for item in leaderboard:
+        result.append(LeaderboardItem(
+            x_username=item.user.x_username,
+            points=item.points,
+        ))
+    return result
+
+
+def _map_recently_joined(
+    recently_joined: List[RecentlyJoinedEntry]
+) -> List[RecentlyJoinedItem]:
+    result = []
+    for item in recently_joined:
+        result.append(RecentlyJoinedItem(
+            x_username=item.user.x_username,
+            joined_at=str(item.joined_at)
+        ))
+    return result
