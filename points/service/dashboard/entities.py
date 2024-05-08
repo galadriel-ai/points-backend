@@ -11,15 +11,20 @@ class DashboardRequest(BaseModel):
         }
 
 
-class UserListItem(BaseModel):
-    x_name: str = Field(description="Users x handle name")
-    points: str = Field(description="Amount of points user has")
+class LeaderboardItem(BaseModel):
+    x_username: str = Field(description="Users x handle name")
+    points: int = Field(description="Amount of points user has")
+
+
+class RecentlyJoinedItem(BaseModel):
+    x_username: str = Field(description="Users x handle name")
+    joined_at: str = Field(description="Time when the user joined")
 
 
 class DashboardResponse(BaseModel):
-    leaderboard_users: List[UserListItem] = Field(
+    leaderboard_users: List[LeaderboardItem] = Field(
         description="A list of leaderboard users."
     )
-    recently_joined_users: List[UserListItem] = Field(
+    recently_joined_users: List[RecentlyJoinedItem] = Field(
         description="A list of recently joined users."
     )

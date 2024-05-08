@@ -5,6 +5,7 @@ from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import JSON
+from sqlalchemy import PrimaryKeyConstraint
 from sqlalchemy import String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
@@ -48,6 +49,20 @@ class EthSignInChallenges(Base):
     wallet_address = Column(String, primary_key=True, nullable=False)
     nonce = Column(String, nullable=False, unique=False)
     issued_at = Column(String, nullable=False, unique=False)
+
+    created_at = Column(DateTime, nullable=False)
+    last_updated_at = Column(DateTime, nullable=False)
+
+
+class Leaderboard(Base):
+    __tablename__ = "leaderboard"
+    user_profile_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey(UserProfile.id),
+        primary_key=True,
+        nullable=False
+    )
+    points = Column(Integer, nullable=False, index=True)
 
     created_at = Column(DateTime, nullable=False)
     last_updated_at = Column(DateTime, nullable=False)

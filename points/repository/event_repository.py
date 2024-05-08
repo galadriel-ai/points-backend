@@ -1,5 +1,7 @@
 import json
+from typing import Dict
 from typing import List
+from uuid import UUID
 
 from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
@@ -47,6 +49,12 @@ WHERE
     AND up.wallet_address IS NOT NULL;
 """
 
+SQL_GET_AGGREGATED_POINTS_PER_USER = """
+SELECT user_profile_id, SUM(points) AS total_points
+FROM quest_event
+GROUP BY user_profile_id;
+"""
+
 
 class EventRepositoryPsql:
     def __init__(self, session_maker: sessionmaker):
@@ -82,3 +90,14 @@ class EventRepositoryPsql:
                     )
                 )
             return users
+
+    def get_total_points(self) -> List[Dict]:
+        result = []
+        with self.session_maker() as session:
+            rows = session.execute(text(SQL_GET_AGGREGATED_POINTS_PER_USER))
+            for row in rows:
+                result.append({
+                    "user_profile_id": row[0],
+                    "points": row[1],
+                })
+        return result
