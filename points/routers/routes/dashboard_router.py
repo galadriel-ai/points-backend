@@ -63,7 +63,6 @@ def _map_recently_joined(
     response_model=DashboardResponse
 )
 async def endpoint_user(
-    user: User = Depends(
-        access_token_service.get_user_from_access_token)
+    user: User = Depends(access_token_service.get_user_from_access_token)
 ):
     return JSONResponse({"x_username": user.x_username})

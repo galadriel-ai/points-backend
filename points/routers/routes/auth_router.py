@@ -1,6 +1,7 @@
 from urllib.parse import urlencode
 
 from fastapi import APIRouter
+from fastapi import Depends
 from fastapi import HTTPException
 from fastapi import status
 from fastapi.responses import RedirectResponse
@@ -27,8 +28,7 @@ router.tags = [TAG]
 xtwitter_sso = TwitterSSO(
     settings.TWITTER_CLIENT_ID,
     settings.TWITTER_CLIENT_SECRET,
-    # TODO: hardcoded for now (NEEDS TO BE SET IN TWITTER APP)
-    "http://localhost:5000/v1/auth/x/callback",
+    settings.TWITTER_AUTH_CALLBACK,
     allow_insecure_http=not settings.is_production()
 )
 
@@ -78,6 +78,7 @@ async def twitter_callback(request: Request):
 )
 async def generate_nonce_endpoint(
     request: GenerateNonceRequest,
+    _: User = Depends(access_token_service.get_user_from_access_token),
 ) -> GenerateNonceResponse:
     auth_repository = AuthRepositoryPsql(connection.get_session_maker())
     return generate_nonce_service.execute(request, auth_repository)
@@ -88,7 +89,9 @@ async def generate_nonce_endpoint(
     response_model=LinkEthWalletResponse
 )
 async def link_eth_wallet_endpoint(
-    request: LinkEthWalletRequest
+    request: LinkEthWalletRequest,
+    user: User = Depends(access_token_service.get_user_from_access_token),
 ) -> LinkEthWalletResponse:
     auth_repository = AuthRepositoryPsql(connection.get_session_maker())
-    return link_eth_wallet_service.execute(request, auth_repository)
+    user_repository = UserRepositoryPsql(connection.get_session_maker())
+    return link_eth_wallet_service.execute(request, user, auth_repository, user_repository)

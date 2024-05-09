@@ -7,7 +7,14 @@
 <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/js-sha3"></script>
 
-<h4>Sign-In with Ethereum</h4>
+<h2>Sign-In with Ethereum</h2>
+<br/>
+<label>
+    JWT:
+    <input id="jwt-input"/>
+</label>
+<br/>
+<br/>
 <button type="button" id="siwe">Sign-In with Ethereum</button>
 <p class="alert">Signature: <span id="siweResult"></span></p>
 <p class="alert">Wallet Link Result: <span id="walletLinkResult"></span></p>
@@ -27,7 +34,7 @@
         return res[0]
     }
 
-    async function getNonceAndIssuedAt(wallet_address) {
+    async function getNonceAndIssuedAt(wallet_address, jwt) {
         // Data to be sent in the POST request
         const data = {
             wallet_address: wallet_address,
@@ -38,7 +45,8 @@
             method: 'POST',   // Specify the method
             headers: {
                 'Content-Type': 'application/json', // Specify the content type
-                'accept': 'application/json'
+                'accept': 'application/json',
+                'authorization': jwt,
             },
             body: JSON.stringify(data) // Convert the JavaScript object to a JSON string
         })
@@ -48,7 +56,7 @@
         return await response.json();
     }
 
-    async function linkWallet(wallet_address, signature) {
+    async function linkWallet(wallet_address, signature, jwt) {
         // Data to be sent in the POST request
         const data = {
             wallet_address: wallet_address,
@@ -60,7 +68,8 @@
             method: 'POST',   // Specify the method
             headers: {
                 'Content-Type': 'application/json', // Specify the content type
-                'accept': 'application/json'
+                'accept': 'application/json',
+                'authorization': jwt,
             },
             body: JSON.stringify(data) // Convert the JavaScript object to a JSON string
         })
@@ -103,16 +112,21 @@
     const siweButton = document.getElementById('siwe');
     console.log("Got button: ", siweButton);
     siweButton.onclick = async () => {
+        const jwtInput = document.getElementById("jwt-input")
+        if (!jwtInput || !jwtInput.value) {
+            alert("Input valid JWT before continuing")
+            return
+        }
         const from = await connectMetamask();
         const address = toChecksumAddress(from);
         console.log("address:", address);
-        const nonceAndIssuedAt = await getNonceAndIssuedAt(address);
+        const nonceAndIssuedAt = await getNonceAndIssuedAt(address, jwtInput.value);
         console.log("nonceAndIssuedAt.nonce:", nonceAndIssuedAt.nonce);
         console.log("nonceAndIssuedAt.issued_at:", nonceAndIssuedAt.issued_at);
         const siweMessage = `localhost wants you to sign in with your Ethereum account:\n${address}\n\n\nURI: http://localhost/login\nVersion: 1\nChain ID: 1\nNonce: ${nonceAndIssuedAt.nonce}\nIssued At: ${nonceAndIssuedAt.issued_at}`;
         const signature = await siweSign(siweMessage, address.toLowerCase());
         console.log("signature:", signature)
-        const linkResult = await linkWallet(address, signature);
+        const linkResult = await linkWallet(address, signature, jwtInput.value);
         console.log("linkResult:", linkResult);
         walletLinkResult.innerHTML = linkResult.success;
     };

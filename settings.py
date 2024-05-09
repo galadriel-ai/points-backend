@@ -27,9 +27,11 @@ FAUCET_ADDRESS = os.getenv("FAUCET_ADDRESS", "0x2AfAcDdd5218943CfB52D4B43205bB96
 
 TWITTER_CLIENT_ID = os.getenv("TWITTER_CLIENT_ID")
 TWITTER_CLIENT_SECRET = os.getenv("TWITTER_CLIENT_SECRET")
-
+# This URL needs to be set in the twitter developer settings! AUTH DOES NOT WORK with any url
+TWITTER_AUTH_CALLBACK = os.getenv("TWITTER_AUTH_CALLBACK", "http://localhost:5000/v1/auth/x/callback")
+# Randomly generated secret key eg `openssl rand -hex 32`
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "default_secret_key")
-
+# Where API redirects if user is logged in
 FRONTEND_AUTH_CALLBACK_URL = os.getenv("FRONTEND_AUTH_CALLBACK_URL", "http://localhost:3000/auth/callback")
 
 
