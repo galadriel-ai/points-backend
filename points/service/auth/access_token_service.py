@@ -32,7 +32,12 @@ def create_access_token(x_id: str) -> str:
     return encoded_jwt
 
 
-def get_access_token_payload(session_token: str) -> Optional[str]:
+def get_user_from_access_token(session_token: str = Security(API_KEY_HEADER)) -> Optional[User]:
+    x_id: str = _get_access_token_payload(session_token)
+    return _get_user_from_x_id(x_id)
+
+
+def _get_access_token_payload(session_token: str) -> Optional[str]:
     try:
         payload = jwt.decode(session_token, settings.JWT_SECRET_KEY, algorithms=[ALGORITHMS.HS256])
         x_id: str = payload.get("x_id")
@@ -45,8 +50,7 @@ def get_access_token_payload(session_token: str) -> Optional[str]:
         raise error_responses.InvalidCredentialsAPIError()
 
 
-def get_user_from_access_token(session_token: str = Security(API_KEY_HEADER)) -> Optional[User]:
-    x_id: str = get_access_token_payload(session_token)
+def _get_user_from_x_id(x_id: str) -> User:
     user_repository = UserRepositoryPsql(connection.get_session_maker())
     user = user_repository.get_by_x_id(x_id)
     if not user:
