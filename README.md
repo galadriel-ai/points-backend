@@ -38,3 +38,8 @@ python -m pytest tests/unit \
     --cov-report term \
     --cov points
 ```
+
+### Deployment
+```bash
+./deploy.sh
+```
