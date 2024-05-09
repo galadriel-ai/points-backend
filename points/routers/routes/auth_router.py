@@ -94,4 +94,10 @@ async def link_eth_wallet_endpoint(
     auth_repository = AuthRepositoryPsql(connection.get_session_maker())
     event_repository = EventRepositoryPsql(connection.get_session_maker())
     user_repository = UserRepositoryPsql(connection.get_session_maker())
-    return link_eth_wallet_service.execute(request, user, auth_repository, event_repository, user_repository)
+    return await link_eth_wallet_service.execute(
+        request,
+        user,
+        auth_repository,
+        event_repository,
+        user_repository
+    )

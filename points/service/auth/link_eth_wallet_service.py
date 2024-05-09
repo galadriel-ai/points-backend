@@ -7,20 +7,26 @@ from points.domain.events.entities import QuestEvent
 from points.repository.auth_repository import AuthRepositoryPsql
 from points.repository.event_repository import EventRepositoryPsql
 from points.repository.user_repository import UserRepositoryPsql
+from points.repository.web3_repository import Web3Repository
+from points.service import error_responses
 from points.service.auth.entities import LinkEthWalletRequest
 from points.service.auth.entities import LinkEthWalletResponse
-from points.service.error_responses import ValidationAPIError
 
 
-def execute(
+async def execute(
     request: LinkEthWalletRequest,
     user: User,
     auth_repository: AuthRepositoryPsql,
     event_repository: EventRepositoryPsql,
     user_repository: UserRepositoryPsql,
+    web3_repository: Web3Repository,
 ) -> LinkEthWalletResponse:
     if not is_address(request.wallet_address):
-        raise ValidationAPIError("wallet_address is incorrect")
+        raise error_responses.ValidationAPIError("wallet_address is incorrect")
+
+    is_wallet_funded = await _is_enough_funds(request.wallet_address, web3_repository)
+    if not is_wallet_funded:
+        raise error_responses.InvalidCredentialsAPIError("Wallet does not have enough funds")
 
     result: bool = verify_signature.execute(
         signature=request.signature,
@@ -41,3 +47,10 @@ def execute(
                 logs=None,
             ))
     return LinkEthWalletResponse(success=result)
+
+
+async def _is_enough_funds(wallet_address: str, web3_repository: Web3Repository,) -> bool:
+    try:
+        return await web3_repository.is_wallet_balance_bigger_than(wallet_address, "0.1")
+    except:
+        raise error_responses.InternalServerAPIError()
