@@ -47,6 +47,7 @@ WHERE
 
 SQL_GET_MOST_RECENT = """
 SELECT 
+    id,
     x_id,
     x_username,
     wallet_address
@@ -60,12 +61,17 @@ class UserRepositoryPsql:
     def __init__(self, session_maker: sessionmaker):
         self.session_maker = session_maker
 
-    def insert(self, user: User) -> None:
+    def insert(
+        self,
+        x_id: str,
+        x_username: str,
+        wallet_address: Optional[str]
+    ) -> None:
         data = {
             "id": utils.generate_uuid(),
-            "x_id": user.x_id,
-            "x_username": user.x_username,
-            "wallet_address": user.wallet_address,
+            "x_id": x_id,
+            "x_username": x_username,
+            "wallet_address": wallet_address,
             "created_at": utils.now(),
             "last_updated_at": utils.now(),
         }
@@ -81,6 +87,7 @@ class UserRepositoryPsql:
             row = session.execute(text(SQL_GET_BY_X_ID), data).first()
             if row:
                 return User(
+                    user_id=row.id,
                     x_id=row.x_id,
                     x_username=row.x_username,
                     wallet_address=row.wallet_address,
@@ -106,6 +113,7 @@ class UserRepositoryPsql:
             users = []
             for row in rows:
                 users.append(User(
+                    user_id=row.id,
                     x_id=row.x_id,
                     x_username=row.x_username,
                     wallet_address=row.wallet_address,

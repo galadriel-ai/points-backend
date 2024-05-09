@@ -2,30 +2,32 @@ from typing import List
 
 from fastapi import APIRouter
 from fastapi import Depends
-from points.repository.leaderboard_repository import LeaderboardEntry
-from points.repository.leaderboard_repository import LeaderboardRepositoryPsql
-from points.repository.leaderboard_repository import RecentlyJoinedEntry
-from starlette.responses import JSONResponse
 
 from points.domain.dashboard.entities import User
 from points.repository import connection
+from points.repository.event_repository import EventRepositoryPsql
+from points.repository.leaderboard_repository import LeaderboardEntry
+from points.repository.leaderboard_repository import LeaderboardRepositoryPsql
+from points.repository.leaderboard_repository import RecentlyJoinedEntry
 from points.service.auth import access_token_service
+from points.service.dashboard import quests_service
 from points.service.dashboard.entities import DashboardRequest
 from points.service.dashboard.entities import DashboardResponse
 from points.service.dashboard.entities import LeaderboardItem
 from points.service.dashboard.entities import RecentlyJoinedItem
+from points.service.dashboard.entities import UserQuestsResponse
 
 TAG = "Dashboard"
-router = APIRouter()
+router = APIRouter(prefix="/v1")
 router.tags = [TAG]
 
 
 @router.post(
-    "/v1/dashboard",
+    "/dashboard",
     response_model=DashboardResponse
 )
 async def endpoint(
-    request: DashboardRequest,
+    _: DashboardRequest,
 ) -> DashboardResponse:
     repository = LeaderboardRepositoryPsql(connection.get_session_maker())
     leaderboard = repository.get_leaderboard()
@@ -59,10 +61,11 @@ def _map_recently_joined(
 
 
 @router.get(
-    "/v1/dashboard/user",
-    response_model=DashboardResponse
+    "/dashboard/user",
+    response_model=UserQuestsResponse
 )
 async def endpoint_user(
     user: User = Depends(access_token_service.get_user_from_access_token)
 ):
-    return JSONResponse({"x_username": user.x_username})
+    event_repository = EventRepositoryPsql(connection.get_session_maker())
+    return await quests_service.execute(user, event_repository)

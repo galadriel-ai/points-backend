@@ -39,7 +39,7 @@ DO UPDATE SET points = :points, last_updated_at = :last_updated_at;
 """
 
 SQL_GET_LEADERBOARD = """
-SELECT u.x_id, u.x_username, u.wallet_address, l.points
+SELECT u.id AS user_profile_id, u.x_id, u.x_username, u.wallet_address, l.points
 FROM leaderboard l
 INNER JOIN user_profile u ON l.user_profile_id = u.id
 ORDER BY l.points DESC
@@ -47,7 +47,7 @@ LIMIT 10;
 """
 
 SQL_GET_RECENTLY_JOINED = """
-SELECT x_id, x_username, wallet_address, created_at
+SELECT id AS user_profile_id, x_id, x_username, wallet_address, created_at
 FROM user_profile
 ORDER BY created_at DESC
 LIMIT 10;
@@ -77,6 +77,7 @@ class LeaderboardRepositoryPsql:
             rows = session.execute(text(SQL_GET_LEADERBOARD))
             for row in rows:
                 user = User(
+                    user_id=row.user_profile_id,
                     x_id=row.x_id,
                     x_username=row.x_username,
                     wallet_address=row.wallet_address,
@@ -93,6 +94,7 @@ class LeaderboardRepositoryPsql:
             rows = session.execute(text(SQL_GET_RECENTLY_JOINED))
             for row in rows:
                 user = User(
+                    user_id=row.user_profile_id,
                     x_id=row.x_id,
                     x_username=row.x_username,
                     wallet_address=row.wallet_address,

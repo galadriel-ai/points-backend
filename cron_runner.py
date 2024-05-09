@@ -1,5 +1,4 @@
 import asyncio
-import time
 from typing import Awaitable
 from typing import Callable
 
@@ -36,10 +35,10 @@ async def _cron_runner(
             await job_callback(*args)
             logger.debug(
                 f"Finished {job_name} job, restarting in {timeout} seconds")
-            time.sleep(timeout)
+            await asyncio.sleep(timeout)
         except Exception as e:
             logger.error(f"{job_name} job failed, restarting", exc_info=True)
-            time.sleep(timeout)
+            await asyncio.sleep(timeout)
 
 
 async def _run_chain_usage_job():

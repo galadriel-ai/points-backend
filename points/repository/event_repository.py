@@ -10,7 +10,7 @@ from points.domain.events.entities import EventUser
 from points.domain.events.entities import QuestEvent
 from points.repository import utils
 
-SQL_INSERT_USER = """
+SQL_INSERT_EVENT = """
 INSERT INTO quest_event (
     id,
     user_profile_id,
@@ -49,6 +49,18 @@ WHERE
     AND up.wallet_address IS NOT NULL;
 """
 
+SQL_GET_EVENTS_BY_USER_X_ID = """
+SELECT
+    up.id AS user_profile_id,
+    qe.event_name,
+    qe.event_description,
+    qe.points,
+    qe.logs
+FROM quest_event qe
+LEFT JOIN user_profile up on qe.user_profile_id = up.id
+WHERE up.id = :user_profile_id;
+"""
+
 SQL_GET_AGGREGATED_POINTS_PER_USER = """
 SELECT user_profile_id, SUM(points) AS total_points
 FROM quest_event
@@ -72,7 +84,7 @@ class EventRepositoryPsql:
             "last_updated_at": utils.now(),
         }
         with self.session_maker() as session:
-            session.execute(text(SQL_INSERT_USER), data)
+            session.execute(text(SQL_INSERT_EVENT), data)
             session.commit()
 
     def get_users_by_missing_event(self, event_name: str) -> List[EventUser]:
@@ -87,6 +99,25 @@ class EventRepositoryPsql:
                     EventUser(
                         user_id=row.user_profile_id,
                         wallet_address=row.wallet_address,
+                    )
+                )
+            return users
+
+    def get_user_events(self, user_profile_id: UUID) -> List[QuestEvent]:
+        data = {
+            "user_profile_id": user_profile_id
+        }
+        with self.session_maker() as session:
+            rows = session.execute(text(SQL_GET_EVENTS_BY_USER_X_ID), data)
+            users: List[QuestEvent] = []
+            for row in rows:
+                users.append(
+                    QuestEvent(
+                        user_profile_id=row.user_profile_id,
+                        event_name=row.event_name,
+                        points=row.points,
+                        event_description=row.event_description,
+                        logs=row.logs,
                     )
                 )
             return users

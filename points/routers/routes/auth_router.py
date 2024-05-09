@@ -12,6 +12,7 @@ import settings
 from points.domain.dashboard.entities import User
 from points.repository import connection
 from points.repository.auth_repository import AuthRepositoryPsql
+from points.repository.event_repository import EventRepositoryPsql
 from points.repository.user_repository import UserRepositoryPsql
 from points.service.auth import access_token_service
 from points.service.auth import generate_nonce_service
@@ -51,11 +52,9 @@ async def twitter_callback(request: Request):
         existing_user = user_repository.get_by_x_id(user_x_id)
         if not existing_user:
             user_repository.insert(
-                User(
-                    x_id=user_x_id,
-                    x_username=user_x_name,
-                    wallet_address=None,
-                )
+                x_id=user_x_id,
+                x_username=user_x_name,
+                wallet_address=None,
             )
         access_token: str = access_token_service.create_access_token(user_x_id)
         response = RedirectResponse(
@@ -93,5 +92,6 @@ async def link_eth_wallet_endpoint(
     user: User = Depends(access_token_service.get_user_from_access_token),
 ) -> LinkEthWalletResponse:
     auth_repository = AuthRepositoryPsql(connection.get_session_maker())
+    event_repository = EventRepositoryPsql(connection.get_session_maker())
     user_repository = UserRepositoryPsql(connection.get_session_maker())
-    return link_eth_wallet_service.execute(request, user, auth_repository, user_repository)
+    return link_eth_wallet_service.execute(request, user, auth_repository, event_repository, user_repository)
