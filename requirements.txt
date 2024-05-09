@@ -20,3 +20,4 @@ uuid7==0.1.0
 fastapi-sso==0.14.2
 siwe==4.0.0
 python-jose==3.3.0
+web3==6.18.0

@@ -1,3 +1,4 @@
+from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
 from uuid import UUID
 
@@ -9,6 +10,7 @@ from points.domain.events.entities import QuestEvent
 from points.service.auth import link_eth_wallet_service as service
 from points.service.auth.entities import LinkEthWalletRequest
 from points.service.auth.entities import LinkEthWalletResponse
+from points.service.error_responses import InvalidCredentialsAPIError
 from points.service.error_responses import ValidationAPIError
 from tests.unit.mocks.mock_auth_repository import AuthRepositoryPsqlMock
 
@@ -26,7 +28,14 @@ def get_event_repository():
     return repo
 
 
-def test_link_eth_wallet():
+def get_web3_repository(is_balance_enough: bool = True):
+    web3_repository = AsyncMock()
+    web3_repository.is_wallet_balance_bigger_than.return_value = is_balance_enough
+    return web3_repository
+
+
+@pytest.mark.asyncio
+async def test_link_eth_wallet():
     request = LinkEthWalletRequest(
         signature="0xMock1",
         wallet_address="0x3FABFC6ae7A14c9abBad96Ac2704a7F8D555a079"
@@ -40,7 +49,14 @@ def test_link_eth_wallet():
     auth_repository = AuthRepositoryPsqlMock()
     user_repository = MagicMock()
 
-    result = service.execute(request, user, auth_repository, get_event_repository(), user_repository)
+    result = await service.execute(
+        request,
+        user,
+        auth_repository,
+        get_event_repository(),
+        user_repository,
+        get_web3_repository(),
+    )
     assert result == LinkEthWalletResponse(success=True)
     service.verify_signature.execute.assert_called_with(
         signature="0xMock1",
@@ -49,7 +65,8 @@ def test_link_eth_wallet():
     )
 
 
-def test_save_user_eth_wallet():
+@pytest.mark.asyncio
+async def test_save_user_eth_wallet():
     request = LinkEthWalletRequest(
         signature="0xMock1",
         wallet_address="0x3FABFC6ae7A14c9abBad96Ac2704a7F8D555a079"
@@ -63,12 +80,20 @@ def test_save_user_eth_wallet():
     auth_repository = AuthRepositoryPsqlMock()
     user_repository = MagicMock()
 
-    result = service.execute(request, user, auth_repository, get_event_repository(), user_repository)
+    result = await service.execute(
+        request,
+        user,
+        auth_repository,
+        get_event_repository(),
+        user_repository,
+        get_web3_repository(),
+    )
     assert result == LinkEthWalletResponse(success=True)
     user_repository.update_wallet_address.assert_called_with(user.x_id, "0x3FABFC6ae7A14c9abBad96Ac2704a7F8D555a079")
 
 
-def test_link_eth_wallet_invalid_wallet_address():
+@pytest.mark.asyncio
+async def test_link_eth_wallet_invalid_wallet_address():
     request = LinkEthWalletRequest(
         signature="0xMock1",
         wallet_address="0xMock2"
@@ -83,10 +108,18 @@ def test_link_eth_wallet_invalid_wallet_address():
     user_repository = MagicMock()
 
     with pytest.raises(ValidationAPIError):
-        service.execute(request, user, auth_repository, get_event_repository(), user_repository)
+        await service.execute(
+            request,
+            user,
+            auth_repository,
+            get_event_repository(),
+            user_repository,
+            get_web3_repository(),
+        )
 
 
-def test_add_event():
+@pytest.mark.asyncio
+async def test_add_event():
     request = LinkEthWalletRequest(
         signature="0xMock1",
         wallet_address="0x3FABFC6ae7A14c9abBad96Ac2704a7F8D555a079"
@@ -101,7 +134,14 @@ def test_add_event():
     user_repository = MagicMock()
 
     event_repo = get_event_repository()
-    result = service.execute(request, user, auth_repository, event_repo, user_repository)
+    result = await service.execute(
+        request,
+        user,
+        auth_repository,
+        event_repo,
+        user_repository,
+        get_web3_repository(),
+    )
     assert result == LinkEthWalletResponse(success=True)
 
     event_repo.add_event.assert_called_with(
@@ -115,7 +155,8 @@ def test_add_event():
     )
 
 
-def test_not_add_event_if_exists():
+@pytest.mark.asyncio
+async def test_not_add_event_if_exists():
     request = LinkEthWalletRequest(
         signature="0xMock1",
         wallet_address="0x3FABFC6ae7A14c9abBad96Ac2704a7F8D555a079"
@@ -139,7 +180,42 @@ def test_not_add_event_if_exists():
             logs=None,
         )
     ]
-    result = service.execute(request, user, auth_repository, event_repo, user_repository)
+    result = await service.execute(
+        request,
+        user,
+        auth_repository,
+        event_repo,
+        user_repository,
+        get_web3_repository(),
+    )
     assert result == LinkEthWalletResponse(success=True)
 
     event_repo.add_event.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_wallet_balance_too_small():
+    request = LinkEthWalletRequest(
+        signature="0xMock1",
+        wallet_address="0x3FABFC6ae7A14c9abBad96Ac2704a7F8D555a079"
+    )
+    user = User(
+        user_id=random_uuid,
+        x_id="mock_id",
+        x_username="mock_name",
+        wallet_address=None,
+    )
+    auth_repository = AuthRepositoryPsqlMock()
+    user_repository = MagicMock()
+
+    event_repo = get_event_repository()
+    event_repo.get_user_events.return_value = []
+    with pytest.raises(InvalidCredentialsAPIError):
+        await service.execute(
+            request,
+            user,
+            auth_repository,
+            event_repo,
+            user_repository,
+            get_web3_repository(is_balance_enough=False),
+        )

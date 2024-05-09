@@ -13,14 +13,15 @@ API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1/")
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*")
 LOG_FILE_PATH = "logs/logs.log"
 
-DB_USER = os.getenv('DB_USER', 'postgres')
-DB_PASSWORD = os.getenv('DB_PASSWORD', 'passw0rd')
-DB_DATABASE = os.getenv('DB_DATABASE', 'points')
-DB_HOST = os.getenv('DB_HOST', 'localhost')
-DB_PORT = os.getenv('DB_PORT', 5432)
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "passw0rd")
+DB_DATABASE = os.getenv("DB_DATABASE", "points")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", 5432)
 
 PROMETHEUS_MULTIPROC_DIR = os.getenv("PROMETHEUS_MULTIPROC_DIR", None)
 
+WEB3_RPC_URL = os.getenv("WEB3_RPC_URL", "https://devnet.galadriel.com")
 EXPLORER_API_BASE_URL = "https://explorer.galadriel.com/api/v2/"
 
 FAUCET_ADDRESS = os.getenv("FAUCET_ADDRESS", "0x2AfAcDdd5218943CfB52D4B43205bB96dD87A165")
@@ -40,4 +41,4 @@ def is_production():
 
 
 if not is_production():
-    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
