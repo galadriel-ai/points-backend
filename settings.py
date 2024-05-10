@@ -35,6 +35,14 @@ JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "default_secret_key")
 # Where API redirects if user is logged in
 FRONTEND_AUTH_CALLBACK_URL = os.getenv("FRONTEND_AUTH_CALLBACK_URL", "http://localhost:3000/auth/callback")
 
+DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
+DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
+
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+DISCORD_GUILD_ID = os.getenv("DISCORD_GUILD_ID")
+# This URL needs to be set in the discord app ouath2 settings! AUTH DOES NOT WORK with any url
+DISCORD_AUTH_CALLBACK = os.getenv("DISCORD_AUTH_CALLBACK", "http://localhost:5000/v1/auth/discord/callback")
+
 
 def is_production():
     return ENVIRONMENT == "production"

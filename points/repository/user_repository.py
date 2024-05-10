@@ -1,3 +1,4 @@
+from uuid import UUID
 from typing import List
 from typing import Optional
 
@@ -56,6 +57,15 @@ ORDER BY id DESC
 LIMIT :count;
 """
 
+SQL_UPDATE_DISCORD_DETAILS = """
+UPDATE user_profile 
+SET 
+    discord_id = :discord_id,
+    discord_username = :discord_username,
+    last_updated_at = :last_updated_at
+WHERE
+    id = :id;
+"""
 
 class UserRepositoryPsql:
     def __init__(self, session_maker: sessionmaker):
@@ -102,6 +112,17 @@ class UserRepositoryPsql:
         }
         with self.session_maker() as session:
             session.execute(text(SQL_UPDATE_WALLET_ADDRESS), data)
+            session.commit()
+
+    def update_discord_id_and_username(self, user_id: UUID, discord_id: str, discord_username: str):
+        data = {
+            "id": user_id,
+            "discord_id": discord_id,
+            "discord_username": discord_username,
+            "last_updated_at": utils.now(),
+        }
+        with self.session_maker() as session:
+            session.execute(text(SQL_UPDATE_DISCORD_DETAILS), data)
             session.commit()
 
     def get_recently_joined(self, count: int) -> List[User]:
