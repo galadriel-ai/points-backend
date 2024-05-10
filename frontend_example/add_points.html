@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Add Points</title>
+</head>
+<body>
+<script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-sha3"></script>
+
+<h2>Admin Add Points</h2>
+<br/>
+<label>
+    User Profile ID:
+    <input id="user-profile-id-input" value="0663e0f5-caca-7340-8000-76ea01fd2325"/>
+</label>
+<label>
+    Points:
+    <input id="points-input"/>
+</label>
+<label>
+    Event description:
+    <input id="event-description-input"/>
+</label>
+<br/>
+<br/>
+<button type="button" id="siwe">Sign-In with Ethereum</button>
+<p class="alert">Signature: <span id="siweResult"></span></p>
+<p class="alert">Backend Result: <span id="backendResult"></span></p>
+
+<script>
+    const provider = new ethers.providers.Web3Provider(window.ethereum); // Example Web3 provider setup
+    const siweResult = document.getElementById('siweResult');
+    const backendResult = document.getElementById('backendResult');
+
+    async function connectMetamask() {
+        const res = await provider.send("eth_requestAccounts", []);
+        console.log("Metamask Address:", res)
+        return res[0]
+    }
+
+    const generateSignature = async (message, from) => {
+        try {
+            console.log("generateSignature");
+            console.log("  msg:", message);
+            console.log("  from:", from);
+            const signer = provider.getSigner(from);
+            console.log("signer:", signer);
+            const sign = await signer.signMessage(message);
+            siweResult.innerHTML = sign;
+            return sign;
+        } catch (err) {
+            console.error(err);
+            siweResult.innerHTML = `Error: ${err.message}`;
+        }
+    };
+
+    function toChecksumAddress(address) {
+        address = address.toLowerCase().replace('0x', '');
+        var hash = keccak256(address);
+        var ret = '0x';
+
+        for (var i = 0; i < address.length; i++) {
+            if (parseInt(hash[i], 16) >= 8) {
+                ret += address[i].toUpperCase();
+            } else {
+                ret += address[i];
+            }
+        }
+
+        return ret;
+    }
+
+    async function addPointsRequest(address, points, userProfileId, eventDescription, signature) {
+        // Data to be sent in the POST request
+        const data = {
+            user_profile_id: userProfileId,
+            points: points,
+            event_description: eventDescription,
+            signature: signature,
+            wallet_address: address,
+        };
+
+        // Making the POST request
+        const response = await fetch('http://127.0.0.1:5000/v1/auth/admin/points', {
+            method: 'POST',   // Specify the method
+            headers: {
+                'Content-Type': 'application/json', // Specify the content type
+                'accept': 'application/json',
+            },
+            body: JSON.stringify(data) // Convert the JavaScript object to a JSON string
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return await response.json();
+    }
+
+    const siweButton = document.getElementById('siwe');
+    console.log("Got button: ", siweButton);
+    siweButton.onclick = async () => {
+        const from = await connectMetamask();
+        const address = toChecksumAddress(from);
+        console.log("address:", address);
+
+        let userProfileId = document.getElementById("user-profile-id-input")
+        if (!userProfileId || !userProfileId.value) {
+            alert("Input valid user profile id before continuing")
+            return
+        }
+        userProfileId = userProfileId.value;
+
+        let points = document.getElementById("points-input")
+        if (!points || !points.value) {
+            alert("Input valid points before continuing")
+            return
+        }
+        points = points.value;
+
+        let eventDescription = document.getElementById("event-description-input")
+        if (!eventDescription || !eventDescription.value) {
+            alert("Input valid event description before continuing")
+            return
+        }
+        eventDescription = eventDescription.value;
+
+        const siweMessage = `${address} is giving ${points} points to ${userProfileId}.\n${eventDescription}`;
+        const signature = await generateSignature(siweMessage, address.toLowerCase());
+        console.log("signature:", signature)
+
+        const addPointsResult = await addPointsRequest(address, points, userProfileId, eventDescription, signature);
+        console.log("addPointsResult:", addPointsResult);
+        backendResult.innerHTML = addPointsResult.success;
+    };
+</script>
+
+</body>
+</html>

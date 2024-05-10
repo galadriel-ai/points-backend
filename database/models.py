@@ -5,9 +5,8 @@ from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import JSON
-from sqlalchemy import PrimaryKeyConstraint
 from sqlalchemy import String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ENUM
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -35,10 +34,20 @@ class QuestEvent(Base):
         nullable=False
     )
 
-    event_name = Column(String, nullable=False, unique=False)
+    event_name = Column(ENUM(
+        "connect_wallet",
+        "used_faucet",
+        "make_tx",
+        "deploy_contract",
+        "join_discord",
+        "follow_galardiel_on_x",
+        "manual",
+        name='event_name_enum'
+    ), nullable=False, unique=False)
     event_description = Column(String, nullable=True, unique=False)
     points = Column(Integer, nullable=False, unique=False)
     logs = Column(JSON, nullable=True, unique=False)
+    signature = Column(String, nullable=True, unique=True)
 
     created_at = Column(DateTime, nullable=False)
     last_updated_at = Column(DateTime, nullable=False)

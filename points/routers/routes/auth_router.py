@@ -14,6 +14,7 @@ from points.repository import connection
 from points.repository.auth_repository import AuthRepositoryPsql
 from points.repository.event_repository import EventRepositoryPsql
 from points.repository.user_repository import UserRepositoryPsql
+from points.repository.web3_repository import Web3Repository
 from points.service.auth import access_token_service
 from points.service.auth import generate_nonce_service
 from points.service.auth import link_eth_wallet_service
@@ -94,10 +95,12 @@ async def link_eth_wallet_endpoint(
     auth_repository = AuthRepositoryPsql(connection.get_session_maker())
     event_repository = EventRepositoryPsql(connection.get_session_maker())
     user_repository = UserRepositoryPsql(connection.get_session_maker())
+    web3_repository = Web3Repository()
     return await link_eth_wallet_service.execute(
         request,
         user,
         auth_repository,
         event_repository,
-        user_repository
+        user_repository,
+        web3_repository
     )
