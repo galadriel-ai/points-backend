@@ -20,8 +20,8 @@ class UserProfile(Base):
     x_id = Column(String, nullable=False, unique=True)
     x_username = Column(String, nullable=False, unique=False)
 
-    discord_id = Column(String, nullable=False, unique=True)
-    discord_username = Column(String, nullable=False, unique=True)
+    discord_id = Column(String, nullable=True, unique=True)
+    discord_username = Column(String, nullable=True, unique=True)
 
     wallet_address = Column(String, nullable=True, unique=False)
 
