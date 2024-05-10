@@ -19,7 +19,6 @@ async def execute(
         EVENT_FAUCET.name)
     for user in users:
         if not user.wallet_address:
-            # Should not happen
             continue
         await _handle_event(
             user,

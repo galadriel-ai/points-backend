@@ -33,6 +33,7 @@ ORDERED_QUESTS = [
 class EventUser:
     user_id: UUID
     wallet_address: Optional[str]
+    discord_id: Optional[str]
 
 
 @dataclass(frozen=True)
