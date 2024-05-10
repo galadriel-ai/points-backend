@@ -66,3 +66,20 @@ class Leaderboard(Base):
 
     created_at = Column(DateTime, nullable=False)
     last_updated_at = Column(DateTime, nullable=False)
+
+
+class UserToken(Base):
+    __tablename__ = "user_token"
+    user_profile_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey(UserProfile.id),
+        primary_key=True,
+        nullable=False,
+        unique=True,
+    )
+    access_token = Column(String, nullable=False)
+    refresh_token = Column(String, nullable=False)
+    expires_at = Column(Integer, nullable=False)
+
+    created_at = Column(DateTime, nullable=False)
+    last_updated_at = Column(DateTime, nullable=False)
