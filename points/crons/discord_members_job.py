@@ -11,7 +11,4 @@ async def execute(
     event_repository: EventRepositoryPsql,
     discord_repository: DiscordRepository,
 ) -> None:
-    try:
-        await handle_join_discord_events_use_case.execute(event_repository, discord_repository)
-    except:
-        logger.error("Error in handling discord members", exc_info=True)
+    await handle_join_discord_events_use_case.execute(event_repository, discord_repository)
