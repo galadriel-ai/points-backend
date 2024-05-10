@@ -7,6 +7,7 @@ from points.domain.events.entities import QuestEvent
 from points.repository.event_repository import EventRepositoryPsql
 from points.repository.explorer_repository import ExplorerRepositoryHTTP
 
+SLEEP_TIME = 1
 
 async def execute(
     event_repository: EventRepositoryPsql,
@@ -22,7 +23,7 @@ async def execute(
             event_repository,
             explorer_repository
         )
-        await asyncio.sleep(1)
+        await asyncio.sleep(SLEEP_TIME)
 
 
 async def _handle_event(

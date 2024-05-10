@@ -2,8 +2,6 @@ from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
 from uuid import UUID
 
-import pytest
-
 import points.domain.events.handle_use_faucet_events_use_case as use_case
 import settings
 from points.domain.events.entities import EVENT_FAUCET
@@ -17,7 +15,10 @@ def setup():
     pass
 
 
-@pytest.mark.asyncio
+def setup_function():
+    use_case.SLEEP_TIME = 0
+
+
 async def test_no_users():
     event_repo = MagicMock()
     event_repo.get_users_by_missing_event.return_value = []
@@ -26,7 +27,6 @@ async def test_no_users():
     explorer_repo.get_transactions_to_account.assert_not_called()
 
 
-@pytest.mark.asyncio
 async def test_no_txs():
     event_repo = MagicMock()
     event_repo.get_users_by_missing_event.return_value = [
@@ -41,7 +41,6 @@ async def test_no_txs():
     event_repo.add_event.assert_not_called()
 
 
-@pytest.mark.asyncio
 async def test_no_txs_from_faucet():
     event_repo = MagicMock()
     event_repo.get_users_by_missing_event.return_value = [
@@ -59,7 +58,6 @@ async def test_no_txs_from_faucet():
     event_repo.add_event.assert_not_called()
 
 
-@pytest.mark.asyncio
 async def test_updates_one():
     event_repo = MagicMock()
     event_repo.get_users_by_missing_event.return_value = [
