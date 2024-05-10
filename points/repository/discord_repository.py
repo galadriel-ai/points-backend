@@ -46,4 +46,3 @@ class DiscordRepository:
         async with aiohttp.ClientSession(headers=self.headers) as session:
             async with session.get(url) as response:
                 return response.status == 200
-
