@@ -8,12 +8,15 @@ from points.domain.events.entities import QuestEvent
 from points.repository.event_repository import EventRepositoryPsql
 from points.repository.explorer_repository import ExplorerRepositoryHTTP
 
+SLEEP_TIME = 1
+
 
 async def execute(
     event_repository: EventRepositoryPsql,
     explorer_repository: ExplorerRepositoryHTTP,
 ) -> None:
-    users: List[EventUser] = event_repository.get_users_by_missing_event(EVENT_FAUCET.name)
+    users: List[EventUser] = event_repository.get_users_by_missing_event(
+        EVENT_FAUCET.name)
     for user in users:
         if not user.wallet_address:
             # Should not happen
@@ -23,7 +26,7 @@ async def execute(
             event_repository,
             explorer_repository,
         )
-        await asyncio.sleep(1)
+        await asyncio.sleep(SLEEP_TIME)
 
 
 async def _handle_event(
@@ -31,13 +34,15 @@ async def _handle_event(
     event_repository: EventRepositoryPsql,
     explorer_repository: ExplorerRepositoryHTTP
 ) -> None:
-    response = await explorer_repository.get_transactions_to_account(user.wallet_address)
+    response = await explorer_repository.get_transactions_to_account(
+        user.wallet_address)
     if not response or not len(response.get("items")):
         return
 
     is_faucet_tx_present = False
+    faucet_address = settings.FAUCET_ADDRESS.lower()
     for tx in response.get("items", []):
-        if tx.get("from", {}).get("hash", "").lower() == settings.FAUCET_ADDRESS.lower():
+        if tx.get("from", {}).get("hash", "").lower() == faucet_address:
             is_faucet_tx_present = True
             break
     if not is_faucet_tx_present:
