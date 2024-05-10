@@ -2,8 +2,6 @@ from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
 from uuid import UUID
 
-import pytest
-
 import points.domain.events.handle_make_deployment_events_use_case as use_case
 from points.domain.events.entities import EVENT_DEPLOY_CONTRACT
 from points.domain.events.entities import EventUser
@@ -19,7 +17,10 @@ def setup():
     i = 0
 
 
-@pytest.mark.asyncio
+def setup_function():
+    use_case.SLEEP_TIME = 0
+
+
 async def test_no_users():
     event_repo = MagicMock()
     event_repo.get_users_by_missing_event.return_value = []
@@ -28,7 +29,6 @@ async def test_no_users():
     explorer_repo.get_transactions_from_account.assert_not_called()
 
 
-@pytest.mark.asyncio
 async def test_no_txs():
     event_repo = MagicMock()
     event_repo.get_users_by_missing_event.return_value = [
@@ -43,7 +43,6 @@ async def test_no_txs():
     event_repo.add_event.assert_not_called()
 
 
-@pytest.mark.asyncio
 async def test_updates_one():
     event_repo = MagicMock()
     event_repo.get_users_by_missing_event.return_value = [
@@ -69,7 +68,6 @@ async def test_updates_one():
     )
 
 
-@pytest.mark.asyncio
 async def test_paginates():
     event_repo = MagicMock()
     event_repo.get_users_by_missing_event.return_value = [
