@@ -9,7 +9,7 @@ ENVIRONMENT = os.getenv("PLATFORM_ENVIRONMENT", "local")
 
 APPLICATION_NAME = "POINTS"
 API_PORT = int(os.getenv("API_PORT", 5000))
-API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1/")
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost/")
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*")
 LOG_FILE_PATH = "logs/logs.log"
 
@@ -37,9 +37,26 @@ JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "default_secret_key")
 # Where API redirects if user is logged in
 FRONTEND_AUTH_CALLBACK_URL = os.getenv("FRONTEND_AUTH_CALLBACK_URL", "http://localhost:3000/auth/callback")
 
+CHAIN_ID = os.getenv("CHAIN_ID", 1)
 
-def is_production():
+
+def is_production() -> bool:
     return ENVIRONMENT == "production"
+
+
+def get_server_url() -> str:
+    if is_production():
+        return "https://api.points.galadriel.com/"
+    base_url = API_BASE_URL
+    if base_url.endswith("/"):
+        base_url = base_url[:-1]
+    return f"{base_url}:{API_PORT}"
+
+
+def get_domain() -> str:
+    if is_production():
+        return "galadriel.com"
+    return "localhost"
 
 
 if not is_production():

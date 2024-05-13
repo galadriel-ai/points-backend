@@ -20,6 +20,8 @@
 <p class="alert">Wallet Link Result: <span id="walletLinkResult"></span></p>
 
 <script>
+    //const DOMAIN = "galadriel.com";
+    const DOMAIN = "localhost";
     //const BASE_URL = "https://api.points.galadriel.com";
     const BASE_URL = "http://localhost:5000";
 
@@ -124,7 +126,7 @@
         const nonceAndIssuedAt = await getNonceAndIssuedAt(address, jwtInput.value);
         console.log("nonceAndIssuedAt.nonce:", nonceAndIssuedAt.nonce);
         console.log("nonceAndIssuedAt.issued_at:", nonceAndIssuedAt.issued_at);
-        const siweMessage = `localhost wants you to sign in with your Ethereum account:\n${address}\n\n\nURI: http://localhost/login\nVersion: 1\nChain ID: 1\nNonce: ${nonceAndIssuedAt.nonce}\nIssued At: ${nonceAndIssuedAt.issued_at}`;
+        const siweMessage = `${DOMAIN} wants you to sign in with your Ethereum account:\n${address}\n\n\nURI: ${BASE_URL}\nVersion: 1\nChain ID: 1\nNonce: ${nonceAndIssuedAt.nonce}\nIssued At: ${nonceAndIssuedAt.issued_at}`;
         const signature = await siweSign(siweMessage, address.toLowerCase());
         console.log("signature:", signature)
         const linkResult = await linkWallet(address, signature, jwtInput.value);
