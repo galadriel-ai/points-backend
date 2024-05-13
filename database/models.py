@@ -9,6 +9,8 @@ from sqlalchemy import String
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Index
+from sqlalchemy import text
 
 Base = declarative_base()
 
@@ -28,6 +30,11 @@ class UserProfile(Base):
 
 class QuestEvent(Base):
     __tablename__ = "quest_event"
+    __table_args__ = (
+        Index('idx_unique_signature', 'signature', unique=True,
+              postgresql_where=text("signature IS NOT NULL AND signature != ''")),
+        {},
+    )
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid7)
     user_profile_id = Column(
         UUID(as_uuid=True),
@@ -48,7 +55,7 @@ class QuestEvent(Base):
     event_description = Column(String, nullable=True, unique=False)
     points = Column(Integer, nullable=False, unique=False)
     logs = Column(JSON, nullable=True, unique=False)
-    signature = Column(String, nullable=True, unique=True)
+    signature = Column(String, nullable=True, unique=False)
 
     created_at = Column(DateTime, nullable=False)
     last_updated_at = Column(DateTime, nullable=False)
