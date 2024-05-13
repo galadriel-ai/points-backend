@@ -1,6 +1,6 @@
 """Makes QuestEvent signature unique only if not null or empty
 
-Revision ID: f75a18ca3b1a
+Revision ID: 000000000010
 Revises: 000000000009
 Create Date: 2024-05-13 13:35:08.248429
 
