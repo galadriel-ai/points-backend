@@ -1,5 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
+
+
+class TokenIssuer(str, Enum):
+    TWITTER = "twitter"
 
 
 @dataclass
@@ -9,7 +14,8 @@ class SignMessageComponents:
 
 
 @dataclass(frozen=True)
-class TwitterAccessToken:
+class AccessToken:
+    token_issuer: TokenIssuer
     access_token: str
     refresh_token: str
     expires_at: datetime

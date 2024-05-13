@@ -5,7 +5,8 @@ from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
 from points.domain.auth.entities import SignMessageComponents
-from points.domain.auth.entities import TwitterAccessToken
+from points.domain.auth.entities import TokenIssuer
+from points.domain.auth.entities import AccessToken
 from points.repository import utils
 
 SQL_INSERT_CHALLENGE = """
@@ -34,26 +35,31 @@ WHERE wallet_address = :wallet_address
 
 SQL_INSERT_USER_TWITTER_TOKEN = """
 INSERT INTO user_token (
+    id,
     user_profile_id,
+    token_issuer,
     access_token,
     refresh_token,
     expires_at,
     created_at,
     last_updated_at
 ) VALUES (
+    :id,
     :user_profile_id,
+    :token_issuer,
     :access_token,
     :refresh_token,
     :expires_at,
     :created_at,
     :last_updated_at
 )
-ON CONFLICT (user_profile_id) 
+ON CONFLICT (user_profile_id, token_issuer) 
 DO UPDATE SET access_token = :access_token, refresh_token = :refresh_token, expires_at = :expires_at, last_updated_at = :last_updated_at;
 """
 
-SQL_GET_TWITTER_ACCESS_TOKEN = """
+SQL_GET_ACCESS_TOKEN = """
 SELECT
+    token_issuer,
     access_token,
     refresh_token,
     expires_at
@@ -98,15 +104,18 @@ class AuthRepositoryPsql:
                     issued_at=row[1],
                 )
 
-    def save_user_twitter_token(
+    def save_user_access_token(
         self,
         user_id: UUID,
+        token_issuer: TokenIssuer,
         access_token: str,
         refresh_token: str,
         expires_at: int
     ) -> None:
         data = {
+            "id": utils.generate_uuid(),
             "user_profile_id": user_id,
+            "token_issuer": token_issuer.value,
             "access_token": access_token,
             "refresh_token": refresh_token,
             "expires_at": expires_at,
@@ -117,12 +126,13 @@ class AuthRepositoryPsql:
             session.execute(text(SQL_INSERT_USER_TWITTER_TOKEN), data)
             session.commit()
 
-    def get_user_twitter_token(self, user_id: UUID) -> Optional[TwitterAccessToken]:
+    def get_user_access_token(self, user_id: UUID) -> Optional[AccessToken]:
         data = {"user_profile_id": user_id}
         with self.session_maker() as session:
-            row = session.execute(text(SQL_GET_TWITTER_ACCESS_TOKEN), data).first()
+            row = session.execute(text(SQL_GET_ACCESS_TOKEN), data).first()
             if row:
-                return TwitterAccessToken(
+                return AccessToken(
+                    token_issuer=TokenIssuer(row.token_issuer),
                     access_token=row.access_token,
                     refresh_token=row.refresh_token,
                     expires_at=utils.datetime_from_timestamp(row.expires_at),

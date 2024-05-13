@@ -3,7 +3,8 @@ from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
 from uuid import UUID
 
-from points.domain.auth.entities import TwitterAccessToken
+from points.domain.auth.entities import AccessToken
+from points.domain.auth.entities import TokenIssuer
 from points.domain.dashboard.entities import User
 from points.domain.events.entities import EVENT_FOLLOW_ON_X
 from points.domain.events.entities import QuestEvent
@@ -46,14 +47,14 @@ async def test_already_following():
         AsyncMock(),
     )
     assert result == FollowTwitterResponse(is_following=True)
-    auth_repo.get_user_twitter_token.assert_not_called()
+    auth_repo.get_user_access_token.assert_not_called()
 
 
 async def test_no_token_found():
     event_repo = MagicMock()
     event_repo.get_user_events.return_value = []
     auth_repo = MagicMock()
-    auth_repo.get_user_twitter_token.return_value = None
+    auth_repo.get_user_access_token.return_value = None
     twitter_repo = AsyncMock()
 
     result = await service.execute(
@@ -70,7 +71,8 @@ async def test_not_following_valid_token():
     event_repo = MagicMock()
     event_repo.get_user_events.return_value = []
     auth_repo = MagicMock()
-    auth_repo.get_user_twitter_token.return_value = TwitterAccessToken(
+    auth_repo.get_user_access_token.return_value = AccessToken(
+        token_issuer=TokenIssuer.TWITTER,
         access_token="mock_access_token",
         refresh_token="mock_refresh_token",
         expires_at=datetime.datetime(2100, 1, 1, tzinfo=datetime.UTC),
@@ -92,7 +94,8 @@ async def test_is_following_valid_token():
     event_repo = MagicMock()
     event_repo.get_user_events.return_value = []
     auth_repo = MagicMock()
-    auth_repo.get_user_twitter_token.return_value = TwitterAccessToken(
+    auth_repo.get_user_access_token.return_value = AccessToken(
+        token_issuer=TokenIssuer.TWITTER,
         access_token="mock_access_token",
         refresh_token="mock_refresh_token",
         expires_at=datetime.datetime(2100, 1, 1, tzinfo=datetime.UTC),
@@ -124,13 +127,15 @@ async def test_is_following_old_token():
     event_repo = MagicMock()
     event_repo.get_user_events.return_value = []
     auth_repo = MagicMock()
-    auth_repo.get_user_twitter_token.return_value = TwitterAccessToken(
+    auth_repo.get_user_access_token.return_value = AccessToken(
+        token_issuer=TokenIssuer.TWITTER,
         access_token="mock_access_token",
         refresh_token="mock_refresh_token",
         expires_at=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),
     )
     twitter_repo = AsyncMock()
-    twitter_repo.get_new_access_token.return_value = TwitterAccessToken(
+    twitter_repo.get_new_access_token.return_value = AccessToken(
+        token_issuer=TokenIssuer.TWITTER,
         access_token="mock_access_token",
         refresh_token="mock_refresh_token",
         expires_at=datetime.datetime(2100, 1, 1, tzinfo=datetime.UTC),
@@ -161,17 +166,20 @@ async def test_not_following_old_token():
     event_repo = MagicMock()
     event_repo.get_user_events.return_value = []
     auth_repo = MagicMock()
-    auth_repo.get_user_twitter_token.return_value = TwitterAccessToken(
+    auth_repo.get_user_access_token.return_value = AccessToken(
+        token_issuer=TokenIssuer.TWITTER,
         access_token="mock_access_token",
         refresh_token="mock_refresh_token",
         expires_at=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),
     )
     twitter_repo = AsyncMock()
-    twitter_repo.get_new_access_token.return_value = TwitterAccessToken(
+    new_token = AccessToken(
+        token_issuer=TokenIssuer.TWITTER,
         access_token="mock_access_token",
         refresh_token="mock_refresh_token",
         expires_at=datetime.datetime(2100, 1, 1, tzinfo=datetime.UTC),
     )
+    twitter_repo.get_new_access_token.return_value = new_token
     twitter_repo.get_is_following_account.return_value = False
 
     user = _get_user()
@@ -182,6 +190,13 @@ async def test_not_following_old_token():
         twitter_repo,
     )
     assert result == FollowTwitterResponse(is_following=False)
+    auth_repo.save_user_access_token.assert_called_with(
+        user.user_id,
+        TokenIssuer.TWITTER,
+        new_token.access_token,
+        new_token.refresh_token,
+        int(new_token.expires_at.timestamp()),
+    )
     twitter_repo.get_new_access_token.assert_called_with("mock_refresh_token")
     event_repo.add_event.assert_not_called()
 
@@ -190,7 +205,8 @@ async def test_fail_to_get_new_token():
     event_repo = MagicMock()
     event_repo.get_user_events.return_value = []
     auth_repo = MagicMock()
-    auth_repo.get_user_twitter_token.return_value = TwitterAccessToken(
+    auth_repo.get_user_access_token.return_value = AccessToken(
+        token_issuer=TokenIssuer.TWITTER,
         access_token="mock_access_token",
         refresh_token="mock_refresh_token",
         expires_at=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),

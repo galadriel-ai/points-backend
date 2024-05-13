@@ -12,6 +12,7 @@ from starlette.requests import Request
 
 import settings
 from points import api_logger
+from points.domain.auth.entities import TokenIssuer
 from points.domain.dashboard.entities import User
 from points.repository import connection
 from points.repository.auth_repository import AuthRepositoryPsql
@@ -90,8 +91,9 @@ async def twitter_callback(request: Request):
         auth_repo = AuthRepositoryPsql(connection.get_session_maker())
         try:
             if twitter_access_token:
-                auth_repo.save_user_twitter_token(
+                auth_repo.save_user_access_token(
                     user_id,
+                    TokenIssuer.TWITTER,
                     twitter_access_token,
                     refresh_token,
                     twitter_access_token_expires_at

@@ -1,6 +1,7 @@
 import points.repository.utils as db_utils
 from points import api_logger
-from points.domain.auth.entities import TwitterAccessToken
+from points.domain.auth.entities import AccessToken
+from points.domain.auth.entities import TokenIssuer
 from points.domain.dashboard.entities import User
 from points.domain.events.entities import EVENT_FOLLOW_ON_X
 from points.domain.events.entities import QuestEvent
@@ -25,14 +26,15 @@ async def execute(
     if is_following_already:
         return FollowTwitterResponse(is_following=True)
 
-    token: TwitterAccessToken = auth_repository.get_user_twitter_token(user.user_id)
+    token: AccessToken = auth_repository.get_user_access_token(user.user_id)
     if not token:
         return FollowTwitterResponse(is_following=False)
     if token.expires_at < db_utils.now():
         new_token = await twitter_repository.get_new_access_token(token.refresh_token)
         if new_token:
-            auth_repository.save_user_twitter_token(
+            auth_repository.save_user_access_token(
                 user.user_id,
+                TokenIssuer.TWITTER,
                 new_token.access_token,
                 new_token.refresh_token,
                 int(new_token.expires_at.timestamp())

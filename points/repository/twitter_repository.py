@@ -6,7 +6,8 @@ import aiohttp
 
 import settings
 from points import api_logger
-from points.domain.auth.entities import TwitterAccessToken
+from points.domain.auth.entities import AccessToken
+from points.domain.auth.entities import TokenIssuer
 from points.repository import utils
 
 TWITTER_API_BASE_URL = "https://api.twitter.com/2"
@@ -20,7 +21,7 @@ class TwitterRepositoryHTTP:
         self.client_id = client_id
         self.client_secret = client_secret
 
-    async def get_new_access_token(self, refresh_token: str) -> Optional[TwitterAccessToken]:
+    async def get_new_access_token(self, refresh_token: str) -> Optional[AccessToken]:
         client_creds = f"{self.client_id}:{self.client_secret}"
         client_creds_b64 = b64encode(client_creds.encode()).decode()
 
@@ -40,7 +41,8 @@ class TwitterRepositoryHTTP:
                 session.headers.update(headers)
                 async with session.post(url, data=form_data) as response:
                     res_json = await response.json()
-                return TwitterAccessToken(
+                return AccessToken(
+                    token_issuer=TokenIssuer.TWITTER,
                     access_token=res_json["access_token"],
                     refresh_token=res_json["refresh_token"],
                     expires_at=utils.now() + timedelta(seconds=res_json["expires_in"])

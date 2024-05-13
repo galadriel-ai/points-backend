@@ -6,6 +6,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import JSON
 from sqlalchemy import String
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -79,13 +80,16 @@ class Leaderboard(Base):
 
 class UserToken(Base):
     __tablename__ = "user_token"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid7)
+    __table_args__ = (
+        UniqueConstraint("user_profile_id", "token_issuer", name="_user_issuer_uc"),
+    )
     user_profile_id = Column(
         UUID(as_uuid=True),
         ForeignKey(UserProfile.id),
-        primary_key=True,
         nullable=False,
-        unique=True,
     )
+    token_issuer = Column(String, nullable=False)
     access_token = Column(String, nullable=False)
     refresh_token = Column(String, nullable=False)
     expires_at = Column(Integer, nullable=False)
