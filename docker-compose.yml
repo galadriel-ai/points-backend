@@ -13,6 +13,19 @@ services:
     expose:
       - "3000"
     restart: unless-stopped
+  cron:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: docker/services/web/Dockerfile
+    volumes:
+      - ./logs:/home/appuser/logs
+      - ./prometheus:/home/appuser/prometheus
+    command: python cron_runner.py
+    expose:
+      - "3000"
+    restart: unless-stopped
   nginx:
     env_file:
       - .env
