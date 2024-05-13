@@ -48,22 +48,10 @@ class MainMiddleware(BaseHTTPMiddleware):
                 f"API rate limited to {rate_limiter.max_calls_per_hour} calls per hour."
             )
 
-        rate_limited_endpoints = [l for l in ENDPOINT_RATE_LIMITS if l.endpoint in request.url.path]
-        if api_key and len(rate_limited_endpoints):
-            try:
-                user = access_token_service.get_user_from_access_token_str(api_key)
-                rate_limitting_key = rate_limited_endpoints[0].endpoint + str(user.user_id)
-                if user and rate_limiter.is_rate_limited(
-                    rate_limitting_key, rate_limited_endpoints[0].limit_per_hour,
-                ):
-                    raise RateLimitExceededAPIError(
-                        f"Endpoint rate limited to {rate_limited_endpoints[0].limit_per_hour} calls per hour."
-                    )
-            except RateLimitExceededAPIError as e:
-                raise e
-            except:
-                # Endpoint should handle any token checks etc
-                pass
+        if rate_limiter.is_endpoint_rate_limited(request.url.path, api_key):
+            raise RateLimitExceededAPIError(
+                f"Endpoint rate limited to {rate_limiter.get_endpoint_calls_per_hour(request.url.path)} calls per hour."
+            )
         try:
             logger.info(
                 f"REQUEST STARTED "
