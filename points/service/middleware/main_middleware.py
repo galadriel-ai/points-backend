@@ -48,7 +48,7 @@ class MainMiddleware(BaseHTTPMiddleware):
                 f"API rate limited to {rate_limiter.max_calls_per_hour} calls per hour."
             )
 
-        rate_limited_endpoints = [l for l in ENDPOINT_RATE_LIMITS if request.url.path in l.endpoint]
+        rate_limited_endpoints = [l for l in ENDPOINT_RATE_LIMITS if l.endpoint in request.url.path]
         if api_key and len(rate_limited_endpoints):
             try:
                 user = access_token_service.get_user_from_access_token_str(api_key)
