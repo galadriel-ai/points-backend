@@ -1,4 +1,5 @@
 from typing import List, Dict
+import asyncio
 import aiohttp
 import settings
 
@@ -21,23 +22,28 @@ class DiscordRepository:
             "Content-Type": "application/json",
         }
 
+    async def _get_request(self, url: str, params: Dict = {}):
+        async with aiohttp.ClientSession(headers=self.headers) as session:
+            async with session.get(url, params=params) as response:
+                if response.status == 429:
+                    await asyncio.sleep(int(response.headers["X-RateLimit-Reset-After"]))
+                    return await self._get_request(url, params=params)
+                await response.raise_for_status()
+                return await response.json()
+
     async def get_users(self) -> List[DiscordUser]:
         url = f"{self.BASE_URL}/guilds/{self.guild_id}/members"
         members = []
         params = {"limit": self.PAGE_LIMIT}
 
-        async with aiohttp.ClientSession(headers=self.headers) as session:
-            while True:
-                async with session.get(url, params=params) as response:
-                    response.raise_for_status()
-                    data = await response.json()
-                    members.extend(
-                        [DiscordUser(id=member["user"]["id"], username=member["user"]["username"]) for member in data])
+        while True:
+            data = self._get_request(url, params=params)
+            members.extend(
+                [DiscordUser(id=member["user"]["id"], username=member["user"]["username"]) for member in data])
 
-                    if len(data) <  self.PAGE_LIMIT:
-                        break
-
-                    params["after"] = data[-1]["user"]["id"]
+            if len(data) <  self.PAGE_LIMIT:
+                break
+            params["after"] = data[-1]["user"]["id"]
 
         return members
 
