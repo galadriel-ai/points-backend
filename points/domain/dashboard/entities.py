@@ -14,3 +14,9 @@ class User:
 @dataclass(frozen=True)
 class ScoredUser(User):
     points: int
+
+
+@dataclass(frozen=True)
+class UserProfileImage(User):
+    profile_image_url: Optional[str]
+    cached_profile_image_url: Optional[str]

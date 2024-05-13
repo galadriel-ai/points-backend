@@ -1,24 +1,24 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List
+from uuid import UUID
 
 from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
-from uuid import UUID
 
-from points.domain.dashboard.entities import User
+from points.domain.dashboard.entities import UserProfileImage
 from points.repository import utils
 
 
 @dataclass
 class LeaderboardEntry:
-    user: User
+    user: UserProfileImage
     points: int
 
 
 @dataclass
 class RecentlyJoinedEntry:
-    user: User
+    user: UserProfileImage
     joined_at: datetime
 
 
@@ -39,7 +39,14 @@ DO UPDATE SET points = :points, last_updated_at = :last_updated_at;
 """
 
 SQL_GET_LEADERBOARD = """
-SELECT u.id AS user_profile_id, u.x_id, u.x_username, u.wallet_address, l.points
+SELECT 
+    u.id AS user_profile_id,
+    u.x_id,
+    u.x_username,
+    u.wallet_address,
+    l.points,
+    u.profile_image_url,
+    u.cached_profile_image_url
 FROM leaderboard l
 INNER JOIN user_profile u ON l.user_profile_id = u.id
 ORDER BY l.points DESC
@@ -47,7 +54,14 @@ LIMIT 10;
 """
 
 SQL_GET_RECENTLY_JOINED = """
-SELECT id AS user_profile_id, x_id, x_username, wallet_address, created_at
+SELECT 
+    id AS user_profile_id, 
+    x_id, 
+    x_username, 
+    wallet_address,
+    profile_image_url, 
+    cached_profile_image_url, 
+    created_at
 FROM user_profile
 ORDER BY created_at DESC
 LIMIT 10;
@@ -76,11 +90,13 @@ class LeaderboardRepositoryPsql:
         with self.session_maker() as session:
             rows = session.execute(text(SQL_GET_LEADERBOARD))
             for row in rows:
-                user = User(
+                user = UserProfileImage(
                     user_id=row.user_profile_id,
                     x_id=row.x_id,
                     x_username=row.x_username,
                     wallet_address=row.wallet_address,
+                    profile_image_url=row.profile_image_url,
+                    cached_profile_image_url=row.cached_profile_image_url,
                 )
                 result.append(LeaderboardEntry(
                     user=user,
@@ -93,11 +109,13 @@ class LeaderboardRepositoryPsql:
         with self.session_maker() as session:
             rows = session.execute(text(SQL_GET_RECENTLY_JOINED))
             for row in rows:
-                user = User(
+                user = UserProfileImage(
                     user_id=row.user_profile_id,
                     x_id=row.x_id,
                     x_username=row.x_username,
                     wallet_address=row.wallet_address,
+                    profile_image_url=row.profile_image_url,
+                    cached_profile_image_url=row.cached_profile_image_url,
                 )
                 result.append(RecentlyJoinedEntry(
                     user=user,
