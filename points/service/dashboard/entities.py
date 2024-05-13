@@ -1,4 +1,5 @@
 from typing import List
+from typing import Optional
 
 from pydantic import BaseModel
 from pydantic import Field
@@ -14,11 +15,13 @@ class DashboardRequest(BaseModel):
 class LeaderboardItem(BaseModel):
     x_username: str = Field(description="Users x handle name")
     points: int = Field(description="Amount of points user has")
+    profile_image_url: Optional[str] = Field(description="X profile image URL")
 
 
 class RecentlyJoinedItem(BaseModel):
     x_username: str = Field(description="Users x handle name")
     joined_at: str = Field(description="Time when the user joined")
+    profile_image_url: Optional[str] = Field(description="X profile image URL")
 
 
 class DashboardResponse(BaseModel):

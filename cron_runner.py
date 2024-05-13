@@ -5,10 +5,12 @@ from typing import Callable
 import settings
 from points import api_logger
 from points.crons import chain_usage_job
+from points.crons import image_caching_job
 from points.repository import connection
 from points.repository.event_repository import EventRepositoryPsql
 from points.repository.explorer_repository import ExplorerRepositoryHTTP
 from points.repository.leaderboard_repository import LeaderboardRepositoryPsql
+from points.repository.user_repository import UserRepositoryPsql
 
 logger = api_logger.get()
 
@@ -17,6 +19,7 @@ async def start_cron_jobs():
     tasks = [
         (_run_chain_usage_job, "Chain usage by wallet job", 60),
         (_run_leaderboard_job, "Leaderboard job", 60),
+        (_run_image_caching_job, "Profile image caching job", 20),
     ]
 
     await asyncio.gather(*[_cron_runner(*t) for t in tasks])
@@ -53,6 +56,11 @@ async def _run_leaderboard_job():
     total_points = event_repository.get_total_points()
     for data in total_points:
         leaderboard_repository.insert_entry(data["user_profile_id"], data["points"])
+
+
+async def _run_image_caching_job():
+    user_repository = UserRepositoryPsql(connection.get_session_maker())
+    await image_caching_job.execute(user_repository)
 
 
 if __name__ == "__main__":

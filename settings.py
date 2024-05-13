@@ -39,6 +39,9 @@ FRONTEND_AUTH_CALLBACK_URL = os.getenv("FRONTEND_AUTH_CALLBACK_URL", "http://loc
 
 CHAIN_ID = os.getenv("CHAIN_ID", 1)
 
+GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_PATH = os.getenv(
+    "GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_PATH", "sidekik-ai-points-backend.json")
+GOOGLE_BUCKET_NAME = os.getenv("GOOGLE_BUCKET_NAME", "galadriel-user-assets")
 
 def is_production() -> bool:
     return ENVIRONMENT == "production"

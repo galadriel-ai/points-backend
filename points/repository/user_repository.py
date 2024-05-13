@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
 
 from points.domain.dashboard.entities import User
+from points.domain.dashboard.entities import UserProfileImage
 from points.repository import utils
 
 SQL_INSERT_USER = """
@@ -13,6 +14,7 @@ INSERT INTO user_profile (
     id,
     x_id,
     x_username,
+    profile_image_url,
     wallet_address,
     created_at,
     last_updated_at
@@ -21,6 +23,7 @@ VALUES (
     :id,
     :x_id,
     :x_username,
+    :profile_image_url,
     :wallet_address,
     :created_at,
     :last_updated_at
@@ -63,6 +66,28 @@ ORDER BY id DESC
 LIMIT :count;
 """
 
+SQL_GET_WITHOUT_CACHED_IMAGES = """
+SELECT 
+    id,
+    x_id,
+    x_username,
+    wallet_address,
+    profile_image_url
+FROM user_profile
+WHERE
+    profile_image_url IS NOT NULL 
+    AND cached_profile_image_url IS NULL;
+"""
+
+SQL_UPDATE_CACHED_PROFILE_PICTURE_URL = """
+UPDATE user_profile 
+SET 
+    cached_profile_image_url = :cached_profile_image_url,
+    last_updated_at = :last_updated_at
+WHERE
+    id = :user_id;
+"""
+
 
 class UserRepositoryPsql:
     def __init__(self, session_maker: sessionmaker):
@@ -72,13 +97,15 @@ class UserRepositoryPsql:
         self,
         x_id: str,
         x_username: str,
-        wallet_address: Optional[str]
+        profile_image_url: Optional[str],
+        wallet_address: Optional[str],
     ) -> UUID:
         user_id = utils.generate_uuid()
         data = {
             "id": user_id,
             "x_id": x_id,
             "x_username": x_username,
+            "profile_image_url": profile_image_url,
             "wallet_address": wallet_address,
             "created_at": utils.now(),
             "last_updated_at": utils.now(),
@@ -142,3 +169,29 @@ class UserRepositoryPsql:
                     wallet_address=row.wallet_address,
                 ))
             return users
+
+    def get_users_without_cached_images(self) -> List[UserProfileImage]:
+        data = {}
+        with self.session_maker() as session:
+            rows = session.execute(text(SQL_GET_WITHOUT_CACHED_IMAGES), data)
+            users = []
+            for row in rows:
+                users.append(UserProfileImage(
+                    user_id=row.id,
+                    x_id=row.x_id,
+                    x_username=row.x_username,
+                    wallet_address=row.wallet_address,
+                    profile_image_url=row.profile_image_url,
+                    cached_profile_image_url=None,
+                ))
+            return users
+
+    def save_cached_profile_image_url(self, user_id: UUID, url: str) -> None:
+        data = {
+            "user_id": user_id,
+            "cached_profile_image_url": url,
+            "last_updated_at": utils.now(),
+        }
+        with self.session_maker() as session:
+            session.execute(text(SQL_UPDATE_CACHED_PROFILE_PICTURE_URL), data)
+            session.commit()

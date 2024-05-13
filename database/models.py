@@ -24,6 +24,9 @@ class UserProfile(Base):
 
     wallet_address = Column(String, nullable=True, unique=False)
 
+    profile_image_url = Column(String, nullable=True, unique=False)
+    cached_profile_image_url = Column(String, nullable=True, unique=False)
+
     created_at = Column(DateTime, nullable=False)
     last_updated_at = Column(DateTime, nullable=False)
 

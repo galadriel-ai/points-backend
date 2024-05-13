@@ -47,6 +47,7 @@ def _map_leaderboard(leaderboard: List[LeaderboardEntry]) -> List[LeaderboardIte
         result.append(LeaderboardItem(
             x_username=item.user.x_username,
             points=item.points,
+            profile_image_url=item.user.cached_profile_image_url,
         ))
     return result
 
@@ -58,7 +59,8 @@ def _map_recently_joined(
     for item in recently_joined:
         result.append(RecentlyJoinedItem(
             x_username=item.user.x_username,
-            joined_at=str(item.joined_at)
+            joined_at=str(item.joined_at),
+            profile_image_url=item.user.cached_profile_image_url,
         ))
     return result
 
