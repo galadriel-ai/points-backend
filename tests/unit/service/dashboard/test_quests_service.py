@@ -22,7 +22,6 @@ def get_user():
     )
 
 
-@pytest.mark.asyncio
 async def test_no_quests_done():
     event_repository = MagicMock()
     event_repository.get_user_events.return_value = []
@@ -33,7 +32,6 @@ async def test_no_quests_done():
         assert response.quests[i].is_completed is False
 
 
-@pytest.mark.asyncio
 async def test_second_quest_completed():
     event_repository = MagicMock()
     user = get_user()
