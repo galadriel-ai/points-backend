@@ -28,7 +28,7 @@ class DiscordRepository:
                 if response.status == 429:
                     await asyncio.sleep(int(response.headers["X-RateLimit-Reset-After"]))
                     return await self._get_request(url, params=params)
-                await response.raise_for_status()
+                response.raise_for_status()
                 return await response.json()
 
     async def get_users(self) -> List[DiscordUser]:
@@ -37,7 +37,7 @@ class DiscordRepository:
         params = {"limit": self.PAGE_LIMIT}
 
         while True:
-            data = self._get_request(url, params=params)
+            data = await self._get_request(url, params=params)
             members.extend(
                 [DiscordUser(id=member["user"]["id"], username=member["user"]["username"]) for member in data])
 
@@ -49,6 +49,9 @@ class DiscordRepository:
 
     async def is_member(self, id: str) -> bool:
         url = f"{self.BASE_URL}/guilds/{self.guild_id}/members/{id}"
-        async with aiohttp.ClientSession(headers=self.headers) as session:
-            async with session.get(url) as response:
-                return response.status == 200
+        try:
+            await self._get_request(url)
+            return True
+        except aiohttp.ClientResponseError as e:
+            if e.status == 404:
+                return False
