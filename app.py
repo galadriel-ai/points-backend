@@ -71,7 +71,7 @@ def custom_openapi():
 def _get_servers():
     servers = []
     if settings.is_production():
-        servers.append({"url": "https://points.galadriel.com/"})
+        servers.append({"url": "https://api.points.galadriel.com/"})
     else:
         base_url = settings.API_BASE_URL
         if base_url.endswith("/"):
