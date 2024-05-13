@@ -22,13 +22,11 @@ router = APIRouter(prefix="/v1")
 router.tags = [TAG]
 
 
-@router.post(
+@router.get(
     "/dashboard",
     response_model=DashboardResponse
 )
-async def endpoint(
-    _: DashboardRequest,
-) -> DashboardResponse:
+async def endpoint() -> DashboardResponse:
     repository = LeaderboardRepositoryPsql(connection.get_session_maker())
     leaderboard = repository.get_leaderboard()
     recently_joined = repository.get_recently_joined()
