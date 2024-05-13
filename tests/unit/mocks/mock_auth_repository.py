@@ -18,6 +18,6 @@ class AuthRepositoryPsqlMock:
         wallet_address: str
     ) -> Optional[SignMessageComponents]:
         return SignMessageComponents(
-            nonce="cqaakoZsXxz",
-            issued_at="2024-05-06T21:01:02.000Z"
+            nonce="CfGZQAlAfZE",
+            issued_at="2024-05-13T11:17:01.918Z"
         )

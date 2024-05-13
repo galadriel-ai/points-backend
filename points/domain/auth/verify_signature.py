@@ -1,6 +1,7 @@
 from siwe import SiweMessage
 from eth_utils import to_checksum_address
 
+import settings
 from points.repository.auth_repository import AuthRepositoryPsql
 
 MESSAGE_TEMPLATE = """{DOMAIN} wants you to sign in with your Ethereum account:
@@ -13,9 +14,9 @@ Chain ID: {CHAIN_ID}
 Nonce: {NONCE}
 Issued At: {ISSUED_AT}"""
 
-DOMAIN = "localhost"
-URI = "http://localhost/login"
-CHAIN_ID = "1"
+DOMAIN = settings.get_domain()
+URI = settings.get_server_url()
+CHAIN_ID = settings.CHAIN_ID
 
 
 def execute(

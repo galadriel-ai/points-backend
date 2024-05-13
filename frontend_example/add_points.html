@@ -28,6 +28,9 @@
 <p class="alert">Backend Result: <span id="backendResult"></span></p>
 
 <script>
+    //const BASE_URL = "https://api.points.galadriel.com";
+    const BASE_URL = "http://localhost:5000";
+
     const provider = new ethers.providers.Web3Provider(window.ethereum); // Example Web3 provider setup
     const siweResult = document.getElementById('siweResult');
     const backendResult = document.getElementById('backendResult');
@@ -81,7 +84,7 @@
         };
 
         // Making the POST request
-        const response = await fetch('http://127.0.0.1:5000/v1/auth/admin/points', {
+        const response = await fetch(`${BASE_URL}/v1/auth/admin/points`, {
             method: 'POST',   // Specify the method
             headers: {
                 'Content-Type': 'application/json', // Specify the content type

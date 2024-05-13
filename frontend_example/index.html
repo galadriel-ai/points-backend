@@ -20,7 +20,10 @@
 <p class="alert">Wallet Link Result: <span id="walletLinkResult"></span></p>
 
 <script>
-    // Your JavaScript code goes here
+    //const DOMAIN = "galadriel.com";
+    const DOMAIN = "localhost";
+    //const BASE_URL = "https://api.points.galadriel.com";
+    const BASE_URL = "http://localhost:5000";
 
     // Placeholder for accounts and provider
     // const accounts = ['0x...']; // Example Ethereum address
@@ -41,7 +44,7 @@
         };
 
         // Making the POST request
-        const response = await fetch('http://127.0.0.1:5000/v1/auth/eth/nonce', {
+        const response = await fetch(`${BASE_URL}/v1/auth/eth/nonce`, {
             method: 'POST',   // Specify the method
             headers: {
                 'Content-Type': 'application/json', // Specify the content type
@@ -64,7 +67,7 @@
         };
 
         // Making the POST request
-        const response = await fetch('http://127.0.0.1:5000/v1/auth/eth/link', {
+        const response = await fetch(`${BASE_URL}/v1/auth/eth/link`, {
             method: 'POST',   // Specify the method
             headers: {
                 'Content-Type': 'application/json', // Specify the content type
@@ -123,7 +126,7 @@
         const nonceAndIssuedAt = await getNonceAndIssuedAt(address, jwtInput.value);
         console.log("nonceAndIssuedAt.nonce:", nonceAndIssuedAt.nonce);
         console.log("nonceAndIssuedAt.issued_at:", nonceAndIssuedAt.issued_at);
-        const siweMessage = `localhost wants you to sign in with your Ethereum account:\n${address}\n\n\nURI: http://localhost/login\nVersion: 1\nChain ID: 1\nNonce: ${nonceAndIssuedAt.nonce}\nIssued At: ${nonceAndIssuedAt.issued_at}`;
+        const siweMessage = `${DOMAIN} wants you to sign in with your Ethereum account:\n${address}\n\n\nURI: ${BASE_URL}\nVersion: 1\nChain ID: 1\nNonce: ${nonceAndIssuedAt.nonce}\nIssued At: ${nonceAndIssuedAt.issued_at}`;
         const signature = await siweSign(siweMessage, address.toLowerCase());
         console.log("signature:", signature)
         const linkResult = await linkWallet(address, signature, jwtInput.value);
