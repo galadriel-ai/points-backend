@@ -17,13 +17,13 @@ class DiscordRepository:
     ):
         self.token = token
         self.guild_id = guild_id
-        self.headers = {
-            "Authorization": f"Bot {self.token}",
-            "Content-Type": "application/json",
-        }
 
-    async def _get_request(self, url: str, params: Dict = {}):
-        async with aiohttp.ClientSession(headers=self.headers) as session:
+    async def _get_request(self, url: str, params: Dict = {}, token=None):
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}" if token else f"Bot {self.token}",
+        }
+        async with aiohttp.ClientSession(headers=headers) as session:
             async with session.get(url, params=params) as response:
                 if response.status == 429:
                     await asyncio.sleep(int(response.headers["X-RateLimit-Reset-After"]))
@@ -47,11 +47,11 @@ class DiscordRepository:
 
         return members
 
-    async def is_member(self, id: str) -> bool:
-        url = f"{self.BASE_URL}/guilds/{self.guild_id}/members/{id}"
+    async def is_member(self, member_id: str, user_token: str = None) -> bool:
+        url = (f"{self.BASE_URL}/users/@me/guilds/{self.guild_id}/member" if user_token
+               else f"{self.BASE_URL}/guilds/{self.guild_id}/members/{member_id}")
         try:
-            await self._get_request(url)
+            await self._get_request(url, token=user_token)
             return True
-        except aiohttp.ClientResponseError as e:
-            if e.status == 404:
-                return False
+        except aiohttp.ClientResponseError:
+            return False

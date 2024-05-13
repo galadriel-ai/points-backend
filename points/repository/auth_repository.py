@@ -64,7 +64,9 @@ SELECT
     refresh_token,
     expires_at
 FROM user_token
-WHERE user_profile_id = :user_profile_id;
+WHERE 
+    user_profile_id = :user_profile_id
+    AND token_issuer = :token_issuer;
 """
 
 
@@ -126,8 +128,11 @@ class AuthRepositoryPsql:
             session.execute(text(SQL_INSERT_USER_TWITTER_TOKEN), data)
             session.commit()
 
-    def get_user_access_token(self, user_id: UUID) -> Optional[AccessToken]:
-        data = {"user_profile_id": user_id}
+    def get_user_access_token(self, user_id: UUID, token_issuer: TokenIssuer) -> Optional[AccessToken]:
+        data = {
+            "user_profile_id": user_id,
+            "token_issuer": token_issuer.value,
+        }
         with self.session_maker() as session:
             row = session.execute(text(SQL_GET_ACCESS_TOKEN), data).first()
             if row:

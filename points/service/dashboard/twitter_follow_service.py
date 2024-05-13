@@ -26,7 +26,7 @@ async def execute(
     if is_following_already:
         return FollowTwitterResponse(is_following=True)
 
-    token: AccessToken = auth_repository.get_user_access_token(user.user_id)
+    token: AccessToken = auth_repository.get_user_access_token(user.user_id, TokenIssuer.TWITTER)
     if not token:
         return FollowTwitterResponse(is_following=False)
     if token.expires_at < db_utils.now():

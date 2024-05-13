@@ -5,6 +5,7 @@ from enum import Enum
 
 class TokenIssuer(str, Enum):
     TWITTER = "twitter"
+    DISCORD = "discord"
 
 
 @dataclass

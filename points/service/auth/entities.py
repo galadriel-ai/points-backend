@@ -40,6 +40,18 @@ class LinkDiscordRequest(BaseModel):
     discord_username: str = Field(
         description="Discord username",
         examples=["username"]
+    ),
+    discord_token: str = Field(
+        description="Discord access token",
+        examples=["token"]
+    ),
+    discord_refresh_token: str = Field(
+        description="Discord refresh token",
+        examples=["refresh_token"]
+    ),
+    discord_token_expires_at: int = Field(
+        description="Discord token expiration time",
+        examples=[1630000000]
     )
 
 

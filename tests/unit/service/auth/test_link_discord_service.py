@@ -15,20 +15,26 @@ user_profile_id = UUID("dbc72453-a34d-47a3-b8fe-2a30b4f29c2d")
 @pytest.mark.asyncio
 async def test_user_not_in_discord():
     request = LinkDiscordRequest(
-        user_profile_id=user_profile_id, discord_id="12345", discord_username="testuser"
+        user_profile_id=user_profile_id,
+        discord_id="12345",
+        discord_username="testuser",
+        discord_token="token",
+        discord_refresh_token="refresh_token",
+        discord_token_expires_at=1234567890,
     )
+    auth_repository = MagicMock()
     event_repository = MagicMock()
     user_repository = MagicMock()
     discord_repository = MagicMock()
-    discord_repository.is_member.return_value = False
+    discord_repository.is_member = AsyncMock(return_value=False)
 
-    response = await service.execute(request, event_repository, user_repository, discord_repository)
+    response = await service.execute(request, auth_repository, event_repository, user_repository, discord_repository)
 
     assert response == LinkDiscordResponse(success=True)
     user_repository.update_discord_id_and_username.assert_called_once_with(
         request.user_profile_id, request.discord_id, request.discord_username
     )
-    discord_repository.is_member.assert_called_once_with(request.discord_id)
+    discord_repository.is_member.assert_called_once_with(request.discord_id, request.discord_token)
     event_repository.get_user_events.assert_not_called()
     event_repository.add_event.assert_not_called()
 
@@ -36,7 +42,12 @@ async def test_user_not_in_discord():
 @pytest.mark.asyncio
 async def test_user_already_has_discord_event():
     request = LinkDiscordRequest(
-        user_profile_id=user_profile_id, discord_id="12345", discord_username="testuser"
+        user_profile_id=user_profile_id,
+        discord_id="12345",
+        discord_username="testuser",
+        discord_token="token",
+        discord_refresh_token="refresh_token",
+        discord_token_expires_at=1234567890,
     )
     existing_event = QuestEvent(
         user_profile_id=request.user_profile_id,
@@ -45,19 +56,20 @@ async def test_user_already_has_discord_event():
         event_description=None,
         logs=None,
     )
+    auth_repository = MagicMock()
     event_repository = MagicMock()
     event_repository.get_user_events.return_value = [existing_event]
     user_repository = MagicMock()
     discord_repository = MagicMock()
-    discord_repository.is_member.return_value = True
+    discord_repository.is_member = AsyncMock(return_value=True)
 
-    response = await service.execute(request, event_repository, user_repository, discord_repository)
+    response = await service.execute(request, auth_repository, event_repository, user_repository, discord_repository)
 
     assert response == LinkDiscordResponse(success=True)
     user_repository.update_discord_id_and_username.assert_called_once_with(
         request.user_profile_id, request.discord_id, request.discord_username
     )
-    discord_repository.is_member.assert_called_once_with(request.discord_id)
+    discord_repository.is_member.assert_called_once_with(request.discord_id, request.discord_token)
     event_repository.get_user_events.assert_called_once_with(request.user_profile_id)
     event_repository.add_event.assert_not_called()
 
@@ -65,21 +77,27 @@ async def test_user_already_has_discord_event():
 @pytest.mark.asyncio
 async def test_user_joining_discord():
     request = LinkDiscordRequest(
-        user_profile_id=user_profile_id, discord_id="12345", discord_username="testuser"
+        user_profile_id=user_profile_id,
+        discord_id="12345",
+        discord_username="testuser",
+        discord_token="token",
+        discord_refresh_token="refresh_token",
+        discord_token_expires_at=1234567890,
     )
+    auth_repository = MagicMock()
     event_repository = MagicMock()
     event_repository.get_user_events.return_value = []
     user_repository = MagicMock()
     discord_repository = MagicMock()
-    discord_repository.is_member.return_value = True
+    discord_repository.is_member = AsyncMock(return_value=True)
 
-    response = await service.execute(request, event_repository, user_repository, discord_repository)
+    response = await service.execute(request, auth_repository, event_repository, user_repository, discord_repository)
 
     assert response == LinkDiscordResponse(success=True)
     user_repository.update_discord_id_and_username.assert_called_once_with(
         request.user_profile_id, request.discord_id, request.discord_username
     )
-    discord_repository.is_member.assert_called_once_with(request.discord_id)
+    discord_repository.is_member.assert_called_once_with(request.discord_id, request.discord_token)
     event_repository.get_user_events.assert_called_once_with(request.user_profile_id)
     event_repository.add_event.assert_called_once()
     event = event_repository.add_event.call_args[0][0]

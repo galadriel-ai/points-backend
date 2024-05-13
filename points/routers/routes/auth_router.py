@@ -66,8 +66,9 @@ discord_discovery = {
 DiscordProvider = create_provider(
     name="discord",
     discovery_document=discord_discovery,
-    default_scope="identify guilds",
+    default_scope="identify guilds guilds.members.read",
 )
+
 discord_sso = DiscordProvider(
     client_id=settings.DISCORD_CLIENT_ID,
     client_secret=settings.DISCORD_CLIENT_SECRET,
@@ -178,10 +179,14 @@ async def discord_callback(request: Request):
     try:
         with discord_sso:
             user = await discord_sso.verify_and_process(request, convert_response=False)
+            discord_access_token = discord_sso.access_token
+            discord_access_token_expires_at = int(discord_sso.oauth_client.token.get("expires_at"))
+            discord_refresh_token = discord_sso.oauth_client.refresh_token
         user_id = utils.get_uuid(request.query_params.get("state"))
         user_discord_id = user["id"]
         user_discord_username = user["username"]
 
+        auth_repository = AuthRepositoryPsql(connection.get_session_maker())
         event_repository = EventRepositoryPsql(connection.get_session_maker())
         user_repository = UserRepositoryPsql(connection.get_session_maker())
         discord_callback = DiscordRepository()
@@ -191,7 +196,11 @@ async def discord_callback(request: Request):
                 user_profile_id=user_id,
                 discord_id=user_discord_id,
                 discord_username=user_discord_username,
+                discord_token=discord_access_token,
+                discord_refresh_token=discord_refresh_token,
+                discord_token_expires_at=discord_access_token_expires_at,
             ),
+            auth_repository,
             event_repository,
             user_repository,
             discord_callback,
