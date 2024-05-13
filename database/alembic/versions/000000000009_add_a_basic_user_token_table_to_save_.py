@@ -1,7 +1,7 @@
 """Add a basic user_token table to save user X bearer tokens
 
-Revision ID: 000000000007
-Revises: 000000000006
+Revision ID: 000000000009
+Revises: 000000000008
 Create Date: 2024-05-10 14:55:14.170678
 
 """
@@ -9,8 +9,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = '000000000007'
-down_revision = '000000000006'
+revision = '000000000009'
+down_revision = '000000000008'
 branch_labels = None
 depends_on = None
 
