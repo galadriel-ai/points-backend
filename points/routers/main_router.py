@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter
 
 from points import api_logger
+from points.routers.routes import admin_router
 from points.routers.routes import auth_router
 from points.routers.routes import dashboard_router
 
@@ -12,6 +13,7 @@ router = APIRouter()
 logger = api_logger.get()
 
 routers_to_include: List[APIRouter] = [
+    admin_router.router,
     auth_router.router,
     dashboard_router.router,
 ]

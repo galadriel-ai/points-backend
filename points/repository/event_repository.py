@@ -3,6 +3,7 @@ from typing import Dict
 from typing import List
 from uuid import UUID
 
+import psycopg2
 from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
@@ -18,6 +19,7 @@ INSERT INTO quest_event (
     event_description,
     points,
     logs,
+    signature,
     created_at,
     last_updated_at
 ) VALUES (
@@ -27,6 +29,7 @@ INSERT INTO quest_event (
     :event_description,
     :points,
     :logs,
+    :signature,
     :created_at,
     :last_updated_at
 )
@@ -72,7 +75,7 @@ class EventRepositoryPsql:
     def __init__(self, session_maker: sessionmaker):
         self.session_maker = session_maker
 
-    def add_event(self, event: QuestEvent):
+    def add_event(self, event: QuestEvent) -> bool:
         data = {
             "id": utils.generate_uuid(),
             "user_profile_id": event.user_profile_id,
@@ -80,12 +83,18 @@ class EventRepositoryPsql:
             "event_description": event.event_description,
             "points": event.points,
             "logs": json.dumps(event.logs) if event.logs else None,
+            "signature": event.signature,
             "created_at": utils.now(),
             "last_updated_at": utils.now(),
         }
-        with self.session_maker() as session:
-            session.execute(text(SQL_INSERT_EVENT), data)
-            session.commit()
+        try:
+            with self.session_maker() as session:
+                session.execute(text(SQL_INSERT_EVENT), data)
+                session.commit()
+            return True
+        except Exception as exc:
+            print("Error in EventRepositoryPsql.add_event():", exc)
+            return False
 
     def get_users_by_missing_event(self, event_name: str) -> List[EventUser]:
         data = {
