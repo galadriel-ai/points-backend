@@ -118,7 +118,7 @@ class UserRepositoryPsql:
     def update_wallet_address(self, x_id: str, wallet_address: str):
         data = {
             "x_id": x_id,
-            "wallet_address": wallet_address,
+            "wallet_address": wallet_address.lower(),
             "last_updated_at": utils.now(),
         }
         with self.session_maker() as session:
