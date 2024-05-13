@@ -46,7 +46,7 @@ def is_production() -> bool:
 
 def get_server_url() -> str:
     if is_production():
-        return "https://api.points.galadriel.com/"
+        return "https://api.points.galadriel.com"
     base_url = API_BASE_URL
     if base_url.endswith("/"):
         base_url = base_url[:-1]
