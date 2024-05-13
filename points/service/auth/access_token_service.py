@@ -33,6 +33,10 @@ def create_access_token(x_id: str) -> str:
 
 
 def get_user_from_access_token(session_token: str = Security(API_KEY_HEADER)) -> Optional[User]:
+    return get_user_from_access_token_str(session_token)
+
+
+def get_user_from_access_token_str(session_token: str) -> Optional[User]:
     x_id: str = _get_access_token_payload(session_token)
     return _get_user_from_x_id(x_id)
 

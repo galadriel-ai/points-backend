@@ -1,18 +1,20 @@
+import time
+
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.base import RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.types import ASGIApp
 
-import settings
 from points import api_logger
+from points.service.auth import access_token_service
 from points.service.error_responses import APIErrorResponse
 from points.service.error_responses import RateLimitExceededAPIError
 from points.service.middleware import util
 from points.service.middleware.entitites import RequestStateKey
+from points.service.middleware.rate_limiter import ENDPOINT_RATE_LIMITS
 from points.service.middleware.rate_limiter import RateLimiter
 from points.utils.http_headers import add_response_headers
-import time
 
 logger = api_logger.get()
 
@@ -44,6 +46,11 @@ class MainMiddleware(BaseHTTPMiddleware):
             )"""
             raise RateLimitExceededAPIError(
                 f"API rate limited to {rate_limiter.max_calls_per_hour} calls per hour."
+            )
+
+        if rate_limiter.is_endpoint_rate_limited(request.url.path, api_key):
+            raise RateLimitExceededAPIError(
+                f"Endpoint rate limited to {rate_limiter.get_endpoint_calls_per_hour(request.url.path)} calls per hour."
             )
         try:
             logger.info(
