@@ -1,6 +1,7 @@
 from uuid import UUID
 from typing import List
 from typing import Optional
+from uuid import UUID
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
@@ -35,6 +36,12 @@ SELECT
     wallet_address 
 FROM user_profile
 WHERE x_id = :x_id;
+"""
+
+SQL_GET_BY_ID = """
+SELECT id, x_id, x_username, wallet_address 
+FROM user_profile 
+WHERE id = :id;
 """
 
 SQL_UPDATE_WALLET_ADDRESS = """
@@ -76,9 +83,10 @@ class UserRepositoryPsql:
         x_id: str,
         x_username: str,
         wallet_address: Optional[str]
-    ) -> None:
+    ) -> UUID:
+        user_id = utils.generate_uuid()
         data = {
-            "id": utils.generate_uuid(),
+            "id": user_id,
             "x_id": x_id,
             "x_username": x_username,
             "wallet_address": wallet_address,
@@ -88,6 +96,7 @@ class UserRepositoryPsql:
         with self.session_maker() as session:
             session.execute(text(SQL_INSERT_USER), data)
             session.commit()
+        return user_id
 
     def get_by_x_id(self, x_id: str) -> Optional[User]:
         data = {
@@ -104,10 +113,24 @@ class UserRepositoryPsql:
                 )
         return None
 
+    def get_by_user_id(self, user_profile_id: UUID) -> Optional[User]:
+        data = {
+            "id": str(user_profile_id)
+        }
+        with self.session_maker() as session:
+            row = session.execute(text(SQL_GET_BY_ID), data).first()
+            if row:
+                return User(
+                    user_id=row.id,
+                    x_id=row.x_id,
+                    x_username=row.x_username,
+                    wallet_address=row.wallet_address,
+                )
+
     def update_wallet_address(self, x_id: str, wallet_address: str):
         data = {
             "x_id": x_id,
-            "wallet_address": wallet_address,
+            "wallet_address": wallet_address.lower(),
             "last_updated_at": utils.now(),
         }
         with self.session_maker() as session:

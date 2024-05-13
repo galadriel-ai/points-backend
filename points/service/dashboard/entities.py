@@ -43,3 +43,9 @@ class UserQuestsResponse(BaseModel):
     quests: List[UserQuest] = Field(
         description="Ordered list on quests by user"
     )
+
+
+class FollowTwitterResponse(BaseModel):
+    is_following: bool = Field(
+        description="Indicates if the current user is following Galadriel on Twitter"
+    )

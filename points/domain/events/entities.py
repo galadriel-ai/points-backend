@@ -44,6 +44,7 @@ class QuestEvent:
 
     event_description: Optional[str]
     logs: Optional[Dict]
+    signature: Optional[str] = ""
 
 
 @dataclass(frozen=True)

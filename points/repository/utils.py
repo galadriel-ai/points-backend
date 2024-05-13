@@ -13,3 +13,10 @@ def now() -> datetime:
         return datetime.datetime.now(datetime.UTC)
     except AttributeError:
         return datetime.datetime.utcnow()
+
+
+def datetime_from_timestamp(timestamp: int) -> datetime:
+    try:
+        return datetime.datetime.fromtimestamp(timestamp, datetime.UTC)
+    except AttributeError:
+        return datetime.datetime.utcfromtimestamp(timestamp)

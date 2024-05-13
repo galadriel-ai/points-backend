@@ -134,3 +134,17 @@ class RateLimitExceededAPIError(APIErrorResponse):
         if self.message_extra:
             result += f" - {self.message_extra}"
         return result
+
+
+class InvalidSignatureError(APIErrorResponse):
+    def __init__(self):
+        pass
+
+    def to_status_code(self) -> status:
+        return status.HTTP_401_UNAUTHORIZED
+
+    def to_code(self) -> str:
+        return "invalid_signature"
+
+    def to_message(self) -> str:
+        return "Invalid signature"

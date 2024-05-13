@@ -3,16 +3,21 @@ from typing import List
 from fastapi import APIRouter
 from fastapi import Depends
 
+import settings
 from points.domain.dashboard.entities import User
 from points.repository import connection
+from points.repository.auth_repository import AuthRepositoryPsql
 from points.repository.event_repository import EventRepositoryPsql
 from points.repository.leaderboard_repository import LeaderboardEntry
 from points.repository.leaderboard_repository import LeaderboardRepositoryPsql
 from points.repository.leaderboard_repository import RecentlyJoinedEntry
+from points.repository.twitter_repository import TwitterRepositoryHTTP
 from points.service.auth import access_token_service
 from points.service.dashboard import quests_service
+from points.service.dashboard import twitter_follow_service
 from points.service.dashboard.entities import DashboardRequest
 from points.service.dashboard.entities import DashboardResponse
+from points.service.dashboard.entities import FollowTwitterResponse
 from points.service.dashboard.entities import LeaderboardItem
 from points.service.dashboard.entities import RecentlyJoinedItem
 from points.service.dashboard.entities import UserQuestsResponse
@@ -22,13 +27,11 @@ router = APIRouter(prefix="/v1")
 router.tags = [TAG]
 
 
-@router.post(
+@router.get(
     "/dashboard",
     response_model=DashboardResponse
 )
-async def endpoint(
-    _: DashboardRequest,
-) -> DashboardResponse:
+async def endpoint() -> DashboardResponse:
     repository = LeaderboardRepositoryPsql(connection.get_session_maker())
     leaderboard = repository.get_leaderboard()
     recently_joined = repository.get_recently_joined()
@@ -69,3 +72,17 @@ async def endpoint_user(
 ):
     event_repository = EventRepositoryPsql(connection.get_session_maker())
     return await quests_service.execute(user, event_repository)
+
+
+@router.post(
+    "/dashboard/user/follow_twitter",
+    response_model=FollowTwitterResponse
+)
+async def endpoint_user(
+    user: User = Depends(access_token_service.get_user_from_access_token)
+):
+    event_repository = EventRepositoryPsql(connection.get_session_maker())
+    auth_repository = AuthRepositoryPsql(connection.get_session_maker())
+    twitter_repository = TwitterRepositoryHTTP(
+        settings.TWITTER_CLIENT_ID, settings.TWITTER_CLIENT_SECRET)
+    return await twitter_follow_service.execute(user, event_repository, auth_repository, twitter_repository)

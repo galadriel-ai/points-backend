@@ -1,20 +1,25 @@
 from urllib.parse import urlencode
+from uuid import UUID
 
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import HTTPException
 from fastapi import status
 from fastapi.responses import RedirectResponse
+from fastapi_sso.sso.base import DiscoveryDocument
 from fastapi_sso.sso.twitter import TwitterSSO
 from fastapi_sso.sso.generic import create_provider
 from starlette.requests import Request
 
 import settings
+from points import api_logger
+from points.domain.auth.entities import TokenIssuer
 from points.domain.dashboard.entities import User
 from points.repository import connection
 from points.repository.auth_repository import AuthRepositoryPsql
 from points.repository.event_repository import EventRepositoryPsql
 from points.repository.user_repository import UserRepositoryPsql
+from points.repository.web3_repository import Web3Repository
 from points.repository.discord_repository import DiscordRepository
 from points.service import utils
 from points.service.auth import access_token_service
@@ -31,7 +36,21 @@ TAG = "Auth"
 router = APIRouter(prefix="/v1/auth")
 router.tags = [TAG]
 
-xtwitter_sso = TwitterSSO(
+logger = api_logger.get()
+
+
+class TwitterUpdatedSSO(TwitterSSO):
+    scope = ["users.read", "follows.read", "tweet.read", "offline.access"]
+
+    async def get_discovery_document(self) -> DiscoveryDocument:
+        return {
+            "authorization_endpoint": "https://twitter.com/i/oauth2/authorize",
+            "token_endpoint": "https://api.twitter.com/2/oauth2/token",
+            "userinfo_endpoint": "https://api.twitter.com/2/users/me?user.fields=profile_image_url",
+        }
+
+
+xtwitter_sso = TwitterUpdatedSSO(
     settings.TWITTER_CLIENT_ID,
     settings.TWITTER_CLIENT_SECRET,
     settings.TWITTER_AUTH_CALLBACK,
@@ -66,19 +85,45 @@ async def twitter_login():
 @router.get("/x/callback")
 async def twitter_callback(request: Request):
     try:
+        twitter_access_token = None
         with xtwitter_sso:
-            user = await xtwitter_sso.verify_and_process(request)
-        user_x_id = user.id
-        user_x_name = user.display_name
+            user = await xtwitter_sso.verify_and_process(request, convert_response=False)
+            user_x_id = user["data"]["id"]
+            try:
+                twitter_access_token = xtwitter_sso.access_token
+                twitter_access_token_expires_at = int(xtwitter_sso.oauth_client.token.get("expires_at"))
+                refresh_token = xtwitter_sso.oauth_client.refresh_token
+            except:
+                logger.error(f"Failed to parse twitter access token data, user_x_id={user_x_id}")
+        user_x_name = user["data"]["username"]
+        # TODO: handle image url
+        image_url = user["data"]["profile_image_url"]
 
         user_repository = UserRepositoryPsql(connection.get_session_maker())
-        existing_user = user_repository.get_by_x_id(user_x_id)
-        if not existing_user:
-            user_repository.insert(
+        user = user_repository.get_by_x_id(user_x_id)
+        user_id: UUID
+        if not user:
+            user_id = user_repository.insert(
                 x_id=user_x_id,
                 x_username=user_x_name,
                 wallet_address=None,
             )
+        else:
+            user_id = user.user_id
+
+        auth_repo = AuthRepositoryPsql(connection.get_session_maker())
+        try:
+            if twitter_access_token:
+                auth_repo.save_user_access_token(
+                    user_id,
+                    TokenIssuer.TWITTER,
+                    twitter_access_token,
+                    refresh_token,
+                    twitter_access_token_expires_at
+                )
+        except Exception as e:
+            logger.error(f"Failed to save user twitter access token, user_id={user_id}")
+
         access_token: str = access_token_service.create_access_token(user_x_id)
         response = RedirectResponse(
             url=settings.FRONTEND_AUTH_CALLBACK_URL
@@ -113,6 +158,7 @@ async def link_eth_wallet_endpoint(
     auth_repository = AuthRepositoryPsql(connection.get_session_maker())
     event_repository = EventRepositoryPsql(connection.get_session_maker())
     user_repository = UserRepositoryPsql(connection.get_session_maker())
+    web3_repository = Web3Repository()
     return await link_eth_wallet_service.execute(
         request, user, auth_repository, event_repository, user_repository
     )

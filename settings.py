@@ -26,6 +26,8 @@ EXPLORER_API_BASE_URL = "https://explorer.galadriel.com/api/v2/"
 
 FAUCET_ADDRESS = os.getenv("FAUCET_ADDRESS", "0x2AfAcDdd5218943CfB52D4B43205bB96dD87A165")
 
+GALADRIEL_TWITTER_USER_ID = os.getenv("GALADRIEL_TWITTER_USER_ID", "1384448028774383616")
+
 TWITTER_CLIENT_ID = os.getenv("TWITTER_CLIENT_ID")
 TWITTER_CLIENT_SECRET = os.getenv("TWITTER_CLIENT_SECRET")
 # This URL needs to be set in the twitter developer settings! AUTH DOES NOT WORK with any url

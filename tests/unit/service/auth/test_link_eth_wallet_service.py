@@ -34,7 +34,6 @@ def get_web3_repository(is_balance_enough: bool = True):
     return web3_repository
 
 
-@pytest.mark.asyncio
 async def test_link_eth_wallet():
     request = LinkEthWalletRequest(
         signature="0xMock1",
@@ -65,7 +64,6 @@ async def test_link_eth_wallet():
     )
 
 
-@pytest.mark.asyncio
 async def test_save_user_eth_wallet():
     request = LinkEthWalletRequest(
         signature="0xMock1",
@@ -92,7 +90,6 @@ async def test_save_user_eth_wallet():
     user_repository.update_wallet_address.assert_called_with(user.x_id, "0x3FABFC6ae7A14c9abBad96Ac2704a7F8D555a079")
 
 
-@pytest.mark.asyncio
 async def test_link_eth_wallet_invalid_wallet_address():
     request = LinkEthWalletRequest(
         signature="0xMock1",
@@ -118,7 +115,6 @@ async def test_link_eth_wallet_invalid_wallet_address():
         )
 
 
-@pytest.mark.asyncio
 async def test_add_event():
     request = LinkEthWalletRequest(
         signature="0xMock1",
@@ -155,7 +151,6 @@ async def test_add_event():
     )
 
 
-@pytest.mark.asyncio
 async def test_not_add_event_if_exists():
     request = LinkEthWalletRequest(
         signature="0xMock1",
@@ -193,7 +188,6 @@ async def test_not_add_event_if_exists():
     event_repo.add_event.assert_not_called()
 
 
-@pytest.mark.asyncio
 async def test_wallet_balance_too_small():
     request = LinkEthWalletRequest(
         signature="0xMock1",
