@@ -73,9 +73,10 @@ class UserRepositoryPsql:
         x_id: str,
         x_username: str,
         wallet_address: Optional[str]
-    ) -> None:
+    ) -> UUID:
+        user_id = utils.generate_uuid()
         data = {
-            "id": utils.generate_uuid(),
+            "id": user_id,
             "x_id": x_id,
             "x_username": x_username,
             "wallet_address": wallet_address,
@@ -85,6 +86,7 @@ class UserRepositoryPsql:
         with self.session_maker() as session:
             session.execute(text(SQL_INSERT_USER), data)
             session.commit()
+        return user_id
 
     def get_by_x_id(self, x_id: str) -> Optional[User]:
         data = {
