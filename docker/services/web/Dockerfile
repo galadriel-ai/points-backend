@@ -15,6 +15,8 @@ WORKDIR /home/appuser
 
 COPY . /home/appuser
 
+COPY sidekik-ai-points-backend.json /home/appuser/sidekik-ai-points-backend.json
+
 # TODO: remove?
 RUN mkdir -p /root/.ssh
 RUN echo "StrictHostKeyChecking no" >> /root/.ssh/config

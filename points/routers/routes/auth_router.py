@@ -97,7 +97,7 @@ async def twitter_callback(request: Request):
                 logger.error(f"Failed to parse twitter access token data, user_x_id={user_x_id}")
         user_x_name = user["data"]["username"]
         # TODO: handle image url
-        image_url = user["data"]["profile_image_url"]
+        image_url = user["data"].get("profile_image_url")
 
         user_repository = UserRepositoryPsql(connection.get_session_maker())
         user = user_repository.get_by_x_id(user_x_id)
@@ -106,6 +106,7 @@ async def twitter_callback(request: Request):
             user_id = user_repository.insert(
                 x_id=user_x_id,
                 x_username=user_x_name,
+                profile_image_url=image_url,
                 wallet_address=None,
             )
         else:

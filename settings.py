@@ -9,7 +9,7 @@ ENVIRONMENT = os.getenv("PLATFORM_ENVIRONMENT", "local")
 
 APPLICATION_NAME = "POINTS"
 API_PORT = int(os.getenv("API_PORT", 5000))
-API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1/")
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost/")
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*")
 LOG_FILE_PATH = "logs/logs.log"
 
@@ -45,9 +45,29 @@ DISCORD_GUILD_ID = os.getenv("DISCORD_GUILD_ID")
 # This URL needs to be set in the discord app ouath2 settings! AUTH DOES NOT WORK with any url
 DISCORD_AUTH_CALLBACK = os.getenv("DISCORD_AUTH_CALLBACK", "http://localhost:5000/v1/auth/discord/callback")
 
+CHAIN_ID = os.getenv("CHAIN_ID", 1)
 
-def is_production():
+GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_PATH = os.getenv(
+    "GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_PATH", "sidekik-ai-points-backend.json")
+GOOGLE_BUCKET_NAME = os.getenv("GOOGLE_BUCKET_NAME", "galadriel-user-assets")
+
+def is_production() -> bool:
     return ENVIRONMENT == "production"
+
+
+def get_server_url() -> str:
+    if is_production():
+        return "https://api.points.galadriel.com"
+    base_url = API_BASE_URL
+    if base_url.endswith("/"):
+        base_url = base_url[:-1]
+    return f"{base_url}:{API_PORT}"
+
+
+def get_domain() -> str:
+    if is_production():
+        return "galadriel.com"
+    return "localhost"
 
 
 if not is_production():

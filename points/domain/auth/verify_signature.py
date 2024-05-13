@@ -1,6 +1,8 @@
 from siwe import SiweMessage
 from eth_utils import to_checksum_address
 
+import settings
+from points import api_logger
 from points.repository.auth_repository import AuthRepositoryPsql
 
 MESSAGE_TEMPLATE = """{DOMAIN} wants you to sign in with your Ethereum account:
@@ -13,9 +15,11 @@ Chain ID: {CHAIN_ID}
 Nonce: {NONCE}
 Issued At: {ISSUED_AT}"""
 
-DOMAIN = "localhost"
-URI = "http://localhost/login"
-CHAIN_ID = "1"
+DOMAIN = settings.get_domain()
+URI = settings.get_server_url()
+CHAIN_ID = settings.CHAIN_ID
+
+logger = api_logger.get()
 
 
 def execute(
@@ -39,5 +43,5 @@ def execute(
         siwe_message.verify(signature, nonce=message_components.nonce, domain=DOMAIN)
         return True
     except Exception as exc:
-        print(f"Failed to verify signature for {wallet_address}, exc:", exc)
+        logger.error(f"Failed to verify signature for {wallet_address} with message: {message}", exc_info=True)
         return False
