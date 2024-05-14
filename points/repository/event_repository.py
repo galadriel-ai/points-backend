@@ -35,10 +35,11 @@ INSERT INTO quest_event (
 )
 """
 
-SQL_GET_WALLETS_BY_MISSING_EVENTS = """
+SQL_GET_USERS_BY_MISSING_EVENTS = """
 SELECT
     up.id AS user_profile_id,
-    up.wallet_address
+    up.wallet_address,
+    up.discord_id
 FROM
     user_profile up
 LEFT JOIN
@@ -49,7 +50,11 @@ AND
     qe.event_name = :event_name
 WHERE
     qe.id IS NULL
-    AND up.wallet_address IS NOT NULL;
+    AND (
+        up.wallet_address IS NOT NULL
+        OR
+        up.discord_id IS NOT NULL
+    );
 """
 
 SQL_GET_EVENTS_BY_USER_X_ID = """
@@ -101,13 +106,14 @@ class EventRepositoryPsql:
             "event_name": event_name,
         }
         with self.session_maker() as session:
-            rows = session.execute(text(SQL_GET_WALLETS_BY_MISSING_EVENTS), data)
+            rows = session.execute(text(SQL_GET_USERS_BY_MISSING_EVENTS), data)
             users: List[EventUser] = []
             for row in rows:
                 users.append(
                     EventUser(
                         user_id=row.user_profile_id,
                         wallet_address=row.wallet_address,
+                        discord_id=row.discord_id,
                     )
                 )
             return users

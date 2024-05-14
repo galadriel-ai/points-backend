@@ -35,6 +35,7 @@ async def test_no_txs():
         EventUser(
             user_id=USER_ID,
             wallet_address="0xMock",
+            discord_id=None,
         )
     ]
     explorer_repo = AsyncMock()
@@ -49,6 +50,7 @@ async def test_updates_one():
         EventUser(
             user_id=USER_ID,
             wallet_address="0xMock",
+            discord_id=None,
         )
     ]
     explorer_repo = AsyncMock()
@@ -74,6 +76,7 @@ async def test_paginates():
         EventUser(
             user_id=USER_ID,
             wallet_address="0xMock",
+            discord_id=None,
         )
     ]
     explorer_repo = AsyncMock()

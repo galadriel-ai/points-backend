@@ -5,6 +5,7 @@ from enum import Enum
 
 class TokenIssuer(str, Enum):
     TWITTER = "twitter"
+    DISCORD = "discord"
 
 
 @dataclass
@@ -19,3 +20,9 @@ class AccessToken:
     access_token: str
     refresh_token: str
     expires_at: datetime
+
+
+@dataclass
+class DiscordUser:
+    id: str
+    username: str
