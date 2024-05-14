@@ -1,3 +1,5 @@
+from datetime import datetime
+from datetime import timezone
 from urllib.parse import urlencode
 from uuid import UUID
 
@@ -31,12 +33,15 @@ from points.service.auth.entities import GenerateNonceResponse
 from points.service.auth.entities import LinkEthWalletRequest
 from points.service.auth.entities import LinkEthWalletResponse
 from points.service.auth.entities import LinkDiscordRequest
+from points.repository import utils as db_utils
 
 TAG = "Auth"
 router = APIRouter(prefix="/v1/auth")
 router.tags = [TAG]
 
 logger = api_logger.get()
+
+MIN_TWITTER_ACCOUNT_AGE_DAYS = 21
 
 
 class TwitterUpdatedSSO(TwitterSSO):
@@ -46,7 +51,7 @@ class TwitterUpdatedSSO(TwitterSSO):
         return {
             "authorization_endpoint": "https://twitter.com/i/oauth2/authorize",
             "token_endpoint": "https://api.twitter.com/2/oauth2/token",
-            "userinfo_endpoint": "https://api.twitter.com/2/users/me?user.fields=profile_image_url",
+            "userinfo_endpoint": "https://api.twitter.com/2/users/me?user.fields=created_at,profile_image_url",
         }
 
 
@@ -88,22 +93,32 @@ async def twitter_callback(request: Request):
     try:
         twitter_access_token = None
         with xtwitter_sso:
-            user = await xtwitter_sso.verify_and_process(request, convert_response=False)
-            user_x_id = user["data"]["id"]
+            twitter_user = await xtwitter_sso.verify_and_process(request, convert_response=False)
+            user_x_id = twitter_user["data"]["id"]
             try:
                 twitter_access_token = xtwitter_sso.access_token
                 twitter_access_token_expires_at = int(xtwitter_sso.oauth_client.token.get("expires_at"))
                 refresh_token = xtwitter_sso.oauth_client.refresh_token
             except:
                 logger.error(f"Failed to parse twitter access token data, user_x_id={user_x_id}")
-        user_x_name = user["data"]["username"]
-        # TODO: handle image url
-        image_url = user["data"].get("profile_image_url")
+        user_x_name = twitter_user["data"]["username"]
+        image_url = twitter_user["data"].get("profile_image_url")
 
         user_repository = UserRepositoryPsql(connection.get_session_maker())
         user = user_repository.get_by_x_id(user_x_id)
         user_id: UUID
         if not user:
+            created_at = twitter_user["data"].get("created_at")
+            created_at_dt = db_utils.now()
+            if created_at:
+                created_at_dt = datetime.fromisoformat(created_at.replace("Z", "+00:00")).replace(tzinfo=timezone.utc)
+            now = db_utils.now()
+            if (now - created_at_dt).days < MIN_TWITTER_ACCOUNT_AGE_DAYS:
+                return RedirectResponse(
+                    url=settings.FRONTEND_AUTH_CALLBACK_URL + "?" + urlencode({"error": "account too new"}),
+                    status_code=status.HTTP_403_FORBIDDEN
+                )
+
             user_id = user_repository.insert(
                 x_id=user_x_id,
                 x_username=user_x_name,
@@ -124,13 +139,17 @@ async def twitter_callback(request: Request):
                     twitter_access_token_expires_at
                 )
         except Exception as e:
-            logger.error(f"Failed to save user twitter access token, user_id={user_id}")
+            logger.error(f"Failed to save user twitter access token, user_id={user_id}", exc_info=True)
+            return RedirectResponse(
+                url=settings.FRONTEND_AUTH_CALLBACK_URL + "?" + urlencode({"error": "unexpected error"}),
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
         access_token: str = access_token_service.create_access_token(user_x_id)
         response = RedirectResponse(
             url=settings.FRONTEND_AUTH_CALLBACK_URL
-            + "?"
-            + urlencode({"token": access_token}),
+                + "?"
+                + urlencode({"token": access_token}),
             status_code=status.HTTP_302_FOUND,
         )
         return response

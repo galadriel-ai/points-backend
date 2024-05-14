@@ -76,9 +76,6 @@
             },
             body: JSON.stringify(data) // Convert the JavaScript object to a JSON string
         })
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
         return await response.json();
     }
 
@@ -131,7 +128,12 @@
         console.log("signature:", signature)
         const linkResult = await linkWallet(address, signature, jwtInput.value);
         console.log("linkResult:", linkResult);
-        walletLinkResult.innerHTML = linkResult.success;
+        if (linkResult.success) {
+          walletLinkResult.innerHTML = linkResult.success;
+        } else {
+          if (linkResult.error?.message) walletLinkResult.innerHTML = linkResult.error?.message;
+          else walletLinkResult.innerHTML = JSON.stringify(linkResult)
+        }
     };
 </script>
 
