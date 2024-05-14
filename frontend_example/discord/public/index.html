@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Link Discord account</title>
+</head>
+<body>
+
+<h2>Link Discord account</h2>
+<br/>
+<label>
+    JWT:
+    <input id="jwt-input"/>
+</label>
+<br/>
+<br/>
+<button type="button" id="discord">Link Discord account</button>
+<script>
+    const PROXY_URL = "/proxy/discord-link";
+
+    async function linkDiscord(jwt) {
+        const response = await fetch(PROXY_URL, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': jwt,
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.url;
+    }
+
+    const discordButton = document.getElementById('discord');
+    discordButton.onclick = async () => {
+        const jwtInput = document.getElementById("jwt-input");
+        if (!jwtInput || !jwtInput.value) {
+            alert("Input valid JWT before continuing");
+            return;
+        }
+
+        try {
+            const finalUrl = await linkDiscord(jwtInput.value);
+            console.log('Final URL:', finalUrl);
+            // Navigate the browser to the final URL
+            window.location.href = finalUrl;
+        } catch (error) {
+            console.error('Error linking Discord account:', error);
+            alert('Failed to link Discord account');
+        }
+    };
+</script>
+
+</body>
+</html>
