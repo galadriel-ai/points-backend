@@ -40,6 +40,7 @@ class UserQuest(BaseModel):
 
 
 class UserQuestsResponse(BaseModel):
+    x_username: str = Field(description="Users x handle name")
     total_points: int = Field(
         description="Total points the user has"
     )
