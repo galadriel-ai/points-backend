@@ -41,7 +41,7 @@ class UserQuest(BaseModel):
 
 class UserQuestsResponse(BaseModel):
     x_username: str = Field(description="Users x handle name")
-    wallet_address: str = Field(description="Users wallet address")
+    wallet_address: Optional[str] = Field(description="Users wallet address")
     total_points: int = Field(
         description="Total points the user has"
     )
