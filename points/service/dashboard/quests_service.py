@@ -26,6 +26,7 @@ async def execute(
 
     return UserQuestsResponse(
         x_username=user.x_username,
+        wallet_address=user.wallet_address,
         total_points=sum(e.points for e in user_events),
         quests=formatted_quests,
     )
