@@ -1,4 +1,7 @@
+import pytest
+
 from points.domain.auth import verify_signature
+from points.service import error_responses
 from tests.unit.mocks.mock_auth_repository import AuthRepositoryPsqlMock
 
 auth_repository = AuthRepositoryPsqlMock()
@@ -20,6 +23,6 @@ def test_verify_signature_lower_case_address():
 
 
 def test_verify_signature_wrong_address():
-    result = verify_signature.execute(
-        SIGNATURE, WALLET_ADDRESS_INCORRECT, auth_repository)
-    assert not result
+    with pytest.raises(error_responses.InvalidSignatureError):
+        verify_signature.execute(
+            SIGNATURE, WALLET_ADDRESS_INCORRECT, auth_repository)
