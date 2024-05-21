@@ -210,7 +210,7 @@ async def discord_callback(request: Request):
         user_repository = UserRepositoryPsql(connection.get_session_maker())
         discord_callback = DiscordRepository()
 
-        return await link_discord_service.execute(
+        discord_response = await link_discord_service.execute(
             LinkDiscordRequest(
                 user_profile_id=user_id,
                 discord_id=user_discord_id,
@@ -223,6 +223,12 @@ async def discord_callback(request: Request):
             event_repository,
             user_repository,
             discord_callback,
+        )
+        return RedirectResponse(
+            url=settings.FRONTEND_DISCORD_CALLBACK_URL
+                + "?"
+                + urlencode({"success": discord_response.success, "is_member": discord_response.is_member}),
+            status_code=status.HTTP_302_FOUND,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"{e}")

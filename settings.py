@@ -44,6 +44,7 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 DISCORD_GUILD_ID = os.getenv("DISCORD_GUILD_ID")
 # This URL needs to be set in the discord app ouath2 settings! AUTH DOES NOT WORK with any url
 DISCORD_AUTH_CALLBACK = os.getenv("DISCORD_AUTH_CALLBACK", "http://localhost:5000/v1/auth/discord/callback")
+FRONTEND_DISCORD_CALLBACK_URL = os.getenv("FRONTEND_DISCORD_CALLBACK_URL", "http://localhost:3000/discord")
 
 CHAIN_ID = os.getenv("CHAIN_ID", 1)
 
