@@ -56,6 +56,12 @@ class LinkDiscordRequest(BaseModel):
 
 
 class LinkDiscordResponse(BaseModel):
+    redirect_url: str = Field(
+        description="Discord login redirect URL"
+    )
+
+
+class DiscordCallbackResponse(BaseModel):
     success: bool = Field(
         description="Boolean indicating if discord linking was successful"
     )

@@ -33,6 +33,7 @@ from points.service.auth.entities import GenerateNonceResponse
 from points.service.auth.entities import LinkEthWalletRequest
 from points.service.auth.entities import LinkEthWalletResponse
 from points.service.auth.entities import LinkDiscordRequest
+from points.service.auth.entities import LinkDiscordResponse
 from points.repository import utils as db_utils
 
 TAG = "Auth"
@@ -185,13 +186,13 @@ async def link_eth_wallet_endpoint(
     )
 
 
-@router.get("/discord/link")
+@router.get("/discord/link", response_model=LinkDiscordResponse)
 async def link_discord_endpoint(
     user: User = Depends(access_token_service.get_user_from_access_token),
 ):
     with discord_sso:
-        return await discord_sso.get_login_redirect(state=str(user.user_id))
-
+        response = await discord_sso.get_login_redirect(state=str(user.user_id))
+        return LinkDiscordResponse(redirect_url=response.headers["location"])
 
 @router.get("/discord/callback")
 async def discord_callback(request: Request):

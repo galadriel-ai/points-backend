@@ -6,7 +6,7 @@ from points.repository.event_repository import EventRepositoryPsql
 from points.repository.user_repository import UserRepositoryPsql
 from points.repository.discord_repository import DiscordRepository
 from points.service.auth.entities import LinkDiscordRequest
-from points.service.auth.entities import LinkDiscordResponse
+from points.service.auth.entities import DiscordCallbackResponse
 
 
 async def execute(
@@ -15,7 +15,7 @@ async def execute(
     event_repository: EventRepositoryPsql,
     user_repository: UserRepositoryPsql,
     discord_repository: DiscordRepository,
-) -> LinkDiscordResponse:
+) -> DiscordCallbackResponse:
     user_repository.update_discord_id_and_username(
         request.user_profile_id, request.discord_id, request.discord_username
     )
@@ -29,7 +29,7 @@ async def execute(
     is_discord_member = await discord_repository.is_member(request.discord_id, request.discord_token)
     if not is_discord_member:
         # user is not a member of the discord server, so no points are awarded
-        return LinkDiscordResponse(success=True, is_member=False)
+        return DiscordCallbackResponse(success=True, is_member=False)
     events = event_repository.get_user_events(request.user_profile_id)
     filtered_events = [e for e in events if e.event_name == EVENT_JOIN_DISCORD.name]
     if not len(filtered_events):
@@ -42,4 +42,4 @@ async def execute(
                 logs=None,
             )
         )
-    return LinkDiscordResponse(success=True, is_member=True)
+    return DiscordCallbackResponse(success=True, is_member=True)
