@@ -30,7 +30,7 @@ async def test_user_not_in_discord():
 
     response = await service.execute(request, auth_repository, event_repository, user_repository, discord_repository)
 
-    assert response == LinkDiscordResponse(success=True)
+    assert response == LinkDiscordResponse(success=True, is_member=False)
     user_repository.update_discord_id_and_username.assert_called_once_with(
         request.user_profile_id, request.discord_id, request.discord_username
     )
@@ -65,7 +65,7 @@ async def test_user_already_has_discord_event():
 
     response = await service.execute(request, auth_repository, event_repository, user_repository, discord_repository)
 
-    assert response == LinkDiscordResponse(success=True)
+    assert response == LinkDiscordResponse(success=True, is_member=True)
     user_repository.update_discord_id_and_username.assert_called_once_with(
         request.user_profile_id, request.discord_id, request.discord_username
     )
@@ -93,7 +93,7 @@ async def test_user_joining_discord():
 
     response = await service.execute(request, auth_repository, event_repository, user_repository, discord_repository)
 
-    assert response == LinkDiscordResponse(success=True)
+    assert response == LinkDiscordResponse(success=True, is_member=True)
     user_repository.update_discord_id_and_username.assert_called_once_with(
         request.user_profile_id, request.discord_id, request.discord_username
     )
