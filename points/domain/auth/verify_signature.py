@@ -4,6 +4,7 @@ from eth_utils import to_checksum_address
 import settings
 from points import api_logger
 from points.repository.auth_repository import AuthRepositoryPsql
+from points.service import error_responses
 
 MESSAGE_TEMPLATE = """{DOMAIN} wants you to sign in with your Ethereum account:
 {WALLET_ADDRESS}
@@ -44,4 +45,4 @@ def execute(
         return True
     except Exception as exc:
         logger.error(f"Failed to verify signature for {wallet_address} with message: {message}", exc_info=True)
-        return False
+        raise error_responses.InvalidSignatureError()
