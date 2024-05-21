@@ -59,3 +59,6 @@ class LinkDiscordResponse(BaseModel):
     success: bool = Field(
         description="Boolean indicating if discord linking was successful"
     )
+    is_member: bool = Field(
+        description="Boolean indicating if user is a member of the discord server"
+    )
