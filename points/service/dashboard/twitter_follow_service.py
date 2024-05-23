@@ -28,6 +28,7 @@ async def execute(
 
     token: AccessToken = auth_repository.get_user_access_token(user.user_id, TokenIssuer.TWITTER)
     if not token:
+        logger.warning(f"twitter follow - No access token for user {user.user_id}")
         return FollowTwitterResponse(is_following=False)
     if token.expires_at < db_utils.now():
         new_token = await twitter_repository.get_new_access_token(token.refresh_token)
@@ -41,9 +42,11 @@ async def execute(
             )
             token = new_token
         else:
+            logger.warning(f"twitter follow - Failed to get new token {user.user_id}")
             return FollowTwitterResponse(is_following=False)
 
     is_following = await twitter_repository.get_is_following_account(token.access_token)
+    logger.warning(f"twitter follow - User: {user.user_id} is_following: {is_following}")
     if is_following:
         event_repository.add_event(QuestEvent(
             user_profile_id=user.user_id,
