@@ -26,7 +26,7 @@ async def execute(
 
     is_wallet_funded = await _is_enough_funds(request.wallet_address, web3_repository)
     if not is_wallet_funded:
-        raise error_responses.InvalidCredentialsAPIError("Wallet does not have enough funds")
+        raise error_responses.NotEnoughFundsAPIError()
 
     result: bool = verify_signature.execute(
         signature=request.signature,
