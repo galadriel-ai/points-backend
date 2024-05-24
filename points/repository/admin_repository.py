@@ -4,7 +4,8 @@ from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
 WHITELIST_X_IDS = [
-    "755403332"  # KasparPeterson
+    "755403332",  # KasparPeterson
+    "1384448028774383616"  # Galadriel_AI
 ]
 
 SQL_GET_ADMINS_WALLET_ADDRESSES = """
