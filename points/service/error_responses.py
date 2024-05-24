@@ -119,6 +119,23 @@ class InvalidCredentialsAPIError(APIErrorResponse):
         return result
 
 
+class NotEnoughFundsAPIError(APIErrorResponse):
+    def __init__(self, message_extra: str = None):
+        self.message_extra = message_extra
+
+    def to_status_code(self) -> status:
+        return status.HTTP_403_FORBIDDEN
+
+    def to_code(self) -> str:
+        return "not_enough_funds"
+
+    def to_message(self) -> str:
+        result = "Wallet does not have enough funds"
+        if self.message_extra:
+            result += f" - {self.message_extra}"
+        return result
+
+
 class RateLimitExceededAPIError(APIErrorResponse):
     def __init__(self, message_extra: str):
         self.message_extra = message_extra
