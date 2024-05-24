@@ -10,7 +10,7 @@ from points.domain.events.entities import QuestEvent
 from points.service.auth import link_eth_wallet_service as service
 from points.service.auth.entities import LinkEthWalletRequest
 from points.service.auth.entities import LinkEthWalletResponse
-from points.service.error_responses import InvalidCredentialsAPIError
+from points.service.error_responses import NotEnoughFundsAPIError
 from points.service.error_responses import ValidationAPIError
 from tests.unit.mocks.mock_auth_repository import AuthRepositoryPsqlMock
 
@@ -204,7 +204,7 @@ async def test_wallet_balance_too_small():
 
     event_repo = get_event_repository()
     event_repo.get_user_events.return_value = []
-    with pytest.raises(InvalidCredentialsAPIError):
+    with pytest.raises(NotEnoughFundsAPIError):
         await service.execute(
             request,
             user,
