@@ -27,5 +27,6 @@ class AdminRepositoryPsql:
         with self.session_maker() as session:
             rows = session.execute(text(SQL_GET_ADMINS_WALLET_ADDRESSES), data)
             for row in rows:
-                result.append(row.wallet_address.lower())
+                if row.wallet_address:
+                    result.append(row.wallet_address.lower())
         return result
