@@ -12,4 +12,4 @@ class Web3Repository:
     async def is_wallet_balance_bigger_than(self, wallet_address: str, value: str, unit="ether") -> bool:
         formatted_address = self.web3_client.to_checksum_address(wallet_address)
         balance = await self.web3_client.eth.get_balance(formatted_address)
-        return balance > self.web3_client.to_wei(value, unit)
+        return balance >= self.web3_client.to_wei(value, unit)
