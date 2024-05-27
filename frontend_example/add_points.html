@@ -10,26 +10,27 @@
 <h2>Admin Add Points</h2>
 <br/>
 <label>
-    User Profile ID:
-    <input id="user-profile-id-input" value="06643166-8f53-7a73-8000-48b07170c4d5"/>
+    User X username:<br/>
+    <input id="x-username-input" value=""/>
 </label>
 <label>
-    Points:
+    Points:<br/>
     <input id="points-input"/>
 </label>
 <label>
-    Event description:
+    Event description:<br/>
     <input id="event-description-input"/>
 </label>
-<br/>
-<br/>
 <button type="button" id="siwe">Sign-In with Ethereum</button>
 <p class="alert">Signature: <span id="siweResult"></span></p>
 <p class="alert">Backend Result: <span id="backendResult"></span></p>
+<span><b>If Result is Success, then ensure points after is different from points before!!!!</b></span>
+<p class="alert">User points before: <span id="points-before"></span></p>
+<p class="alert">User points after: <span id="points-after"></span></p>
 
 <script>
     const BASE_URL = "https://api.points.galadriel.com";
-    //const BASE_URL = "http://localhost:5000";
+    // const BASE_URL = "http://localhost:5000";
 
     const provider = new ethers.providers.Web3Provider(window.ethereum); // Example Web3 provider setup
     const siweResult = document.getElementById('siweResult');
@@ -73,10 +74,10 @@
         return ret;
     }
 
-    async function addPointsRequest(address, points, userProfileId, eventDescription, signature) {
+    async function addPointsRequest(address, points, xUsername, eventDescription, signature) {
         // Data to be sent in the POST request
         const data = {
-            user_profile_id: userProfileId,
+            x_username: xUsername,
             points: points,
             event_description: eventDescription,
             signature: signature,
@@ -105,12 +106,12 @@
         const address = toChecksumAddress(from);
         console.log("address:", address);
 
-        let userProfileId = document.getElementById("user-profile-id-input")
-        if (!userProfileId || !userProfileId.value) {
-            alert("Input valid user profile id before continuing")
+        let xUsername = document.getElementById("x-username-input")
+        if (!xUsername || !xUsername.value) {
+            alert("Input x username before continuing")
             return
         }
-        userProfileId = userProfileId.value;
+        xUsername = xUsername.value;
 
         let points = document.getElementById("points-input")
         if (!points || !points.value) {
@@ -126,15 +127,38 @@
         }
         eventDescription = eventDescription.value;
 
-        const siweMessage = `${address} is giving ${points} points to ${userProfileId}.\n${eventDescription}`;
+        const siweMessage = `${address} is giving ${points} points to @${xUsername.toLowerCase()}.\n${eventDescription}`;
         const signature = await generateSignature(siweMessage, address.toLowerCase());
         console.log("signature:", signature)
 
-        const addPointsResult = await addPointsRequest(address, points, userProfileId, eventDescription, signature);
+        const addPointsResult = await addPointsRequest(address, points, xUsername, eventDescription, signature);
         console.log("addPointsResult:", addPointsResult);
         backendResult.innerHTML = addPointsResult.success;
+        if (addPointsResult) {
+            const pointsBefore = document.getElementById('points-before');
+            const pointsAfter = document.getElementById('points-after');
+            pointsBefore.innerHTML = addPointsResult.points_before;
+            pointsAfter.innerHTML = addPointsResult.points_after;
+        }
+
     };
 </script>
 
+
 </body>
+<style>
+body {
+  display: flex;
+  flex-direction: column;
+  max-width: 1000px;
+  gap: 35px;
+  margin: 0 auto;
+}
+body > button {
+    max-width: 200px;
+}
+input {
+  min-width: 400px;
+}
+</style>
 </html>

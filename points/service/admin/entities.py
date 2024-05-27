@@ -1,10 +1,13 @@
-from pydantic import BaseModel, Field
+from typing import Optional
+
+from pydantic import BaseModel
+from pydantic import Field
 
 
 class PostPointsRequest(BaseModel):
-    user_profile_id: str = Field(
-        description="User profile ID to add points to",
-        examples=["ca249bf4-fd2f-467a-b7c7-749d50a15d00"])
+    x_username: str = Field(
+        description="Case insensitive x username",
+        examples=["galadriel_ai"])
     points: int = Field(
         description="How many points to add to selected user",
         examples=[20]
@@ -22,8 +25,8 @@ class PostPointsRequest(BaseModel):
         examples=["0xMock"]
     )
 
-    def construct_signed_message(self):
-        return f"{self.wallet_address} is giving {self.points} points to {self.user_profile_id}.\n{self.event_description}"
+    def construct_signed_message(self, ):
+        return f"{self.wallet_address} is giving {self.points} points to @{self.x_username.lower()}.\n{self.event_description}"
 
 
 class PostPointsResponse(BaseModel):
@@ -31,3 +34,5 @@ class PostPointsResponse(BaseModel):
         description="Boolean indicating wether the request was successful",
         examples=[True]
     )
+    points_before: Optional[int] = Field()
+    points_after: Optional[int] = Field()
