@@ -67,7 +67,7 @@ def get_server_url() -> str:
 
 def get_domain() -> str:
     if is_production():
-        return "galadriel.com"
+        return "points.galadriel.com"
     return "localhost"
 
 
