@@ -40,6 +40,16 @@ FROM user_profile
 WHERE x_id = :x_id;
 """
 
+SQL_GET_BY_X_USERNAME = """
+SELECT 
+    id, 
+    x_id, 
+    x_username, 
+    wallet_address 
+FROM user_profile
+WHERE x_username ILIKE :x_username;
+"""
+
 SQL_GET_BY_ID = """
 SELECT id, x_id, x_username, wallet_address 
 FROM user_profile 
@@ -98,6 +108,7 @@ WHERE
     id = :id;
 """
 
+
 class UserRepositoryPsql:
     def __init__(self, session_maker: sessionmaker):
         self.session_maker = session_maker
@@ -130,6 +141,21 @@ class UserRepositoryPsql:
         }
         with self.session_maker() as session:
             row = session.execute(text(SQL_GET_BY_X_ID), data).first()
+            if row:
+                return User(
+                    user_id=row.id,
+                    x_id=row.x_id,
+                    x_username=row.x_username,
+                    wallet_address=row.wallet_address,
+                )
+        return None
+
+    def get_by_x_username(self, x_username: str) -> Optional[User]:
+        data = {
+            "x_username": x_username,
+        }
+        with self.session_maker() as session:
+            row = session.execute(text(SQL_GET_BY_X_USERNAME), data).first()
             if row:
                 return User(
                     user_id=row.id,
