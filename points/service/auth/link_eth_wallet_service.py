@@ -24,9 +24,10 @@ async def execute(
     if not is_address(request.wallet_address):
         raise error_responses.ValidationAPIError("wallet_address is incorrect")
 
-    is_wallet_funded = await _is_enough_funds(request.wallet_address, web3_repository)
-    if not is_wallet_funded:
-        raise error_responses.NotEnoughFundsAPIError()
+    # Uncomment when needed
+    # is_wallet_funded = await _is_enough_funds(request.wallet_address, web3_repository)
+    # if not is_wallet_funded:
+    #     raise error_responses.NotEnoughFundsAPIError()
 
     result: bool = verify_signature.execute(
         signature=request.signature,
