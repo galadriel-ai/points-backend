@@ -13,6 +13,8 @@ API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost/")
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*")
 LOG_FILE_PATH = "logs/logs.log"
 
+WHITELIST_FILE = os.getenv("WHITELIST_FILE", "data/whitelist.txt")
+
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "passw0rd")
 DB_DATABASE = os.getenv("DB_DATABASE", "points")

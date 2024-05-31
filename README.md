@@ -43,3 +43,10 @@ python -m pytest tests/unit \
 ```bash
 ./deploy.sh
 ```
+
+
+## Whitelisting users
+
+To whitelist some twitter user, add their twitter user ID to a new line in `data/whitelist.txt` file.  
+To get the ID can use some site like this: https://findidfb.com/find-twitter-id/#
+(Double check profile)

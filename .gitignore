@@ -5,3 +5,4 @@
 venv
 prometheus
 sidekik-ai-points-backend.json
+data/whitelist.txt
