@@ -27,18 +27,19 @@ router = APIRouter(prefix="/v1")
 router.tags = [TAG]
 
 
-@router.get(
-    "/dashboard",
-    response_model=DashboardResponse
-)
-async def endpoint() -> DashboardResponse:
-    repository = LeaderboardRepositoryPsql(connection.get_session_maker())
-    leaderboard = repository.get_leaderboard()
-    recently_joined = repository.get_recently_joined()
-    return DashboardResponse(
-        leaderboard_users=_map_leaderboard(leaderboard),
-        recently_joined_users=_map_recently_joined(recently_joined)
-    )
+# Uncomment when needed
+# @router.get(
+#     "/dashboard",
+#     response_model=DashboardResponse,
+# )
+# async def endpoint() -> DashboardResponse:
+#     repository = LeaderboardRepositoryPsql(connection.get_session_maker())
+#     leaderboard = repository.get_leaderboard()
+#     recently_joined = repository.get_recently_joined()
+#     return DashboardResponse(
+#         leaderboard_users=_map_leaderboard(leaderboard),
+#         recently_joined_users=_map_recently_joined(recently_joined)
+#     )
 
 
 def _map_leaderboard(leaderboard: List[LeaderboardEntry]) -> List[LeaderboardItem]:

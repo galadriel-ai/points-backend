@@ -23,6 +23,7 @@ from points.repository.event_repository import EventRepositoryPsql
 from points.repository.user_repository import UserRepositoryPsql
 from points.repository.web3_repository import Web3Repository
 from points.repository.discord_repository import DiscordRepository
+from points.repository.whitelist_repository import WhitelistRepository
 from points.service import utils
 from points.service.auth import access_token_service
 from points.service.auth import generate_nonce_service
@@ -102,6 +103,14 @@ async def twitter_callback(request: Request):
                 refresh_token = xtwitter_sso.oauth_client.refresh_token
             except:
                 logger.error(f"Failed to parse twitter access token data, user_x_id={user_x_id}")
+
+        whitelist_repository = WhitelistRepository()
+        if not whitelist_repository.is_whitelisted(user_x_id):
+            return RedirectResponse(
+                url=settings.FRONTEND_AUTH_CALLBACK_URL + "?" + urlencode({"callback": "no_access"}),
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+
         user_x_name = twitter_user["data"]["username"]
         image_url = twitter_user["data"].get("profile_image_url")
 
@@ -109,16 +118,17 @@ async def twitter_callback(request: Request):
         user = user_repository.get_by_x_id(user_x_id)
         user_id: UUID
         if not user:
-            created_at = twitter_user["data"].get("created_at")
-            created_at_dt = db_utils.now()
-            if created_at:
-                created_at_dt = datetime.fromisoformat(created_at.replace("Z", "+00:00")).replace(tzinfo=timezone.utc)
-            now = db_utils.now()
-            if (now - created_at_dt).days < MIN_TWITTER_ACCOUNT_AGE_DAYS:
-                return RedirectResponse(
-                    url=settings.FRONTEND_AUTH_CALLBACK_URL + "?" + urlencode({"error": "account too new"}),
-                    status_code=status.HTTP_403_FORBIDDEN
-                )
+            # Once the system is public, uncomment this part
+            # created_at = twitter_user["data"].get("created_at")
+            # created_at_dt = db_utils.now()
+            # if created_at:
+            #     created_at_dt = datetime.fromisoformat(created_at.replace("Z", "+00:00")).replace(tzinfo=timezone.utc)
+            # now = db_utils.now()
+            # if (now - created_at_dt).days < MIN_TWITTER_ACCOUNT_AGE_DAYS:
+            #     return RedirectResponse(
+            #         url=settings.FRONTEND_AUTH_CALLBACK_URL + "?" + urlencode({"error": "account too new"}),
+            #         status_code=status.HTTP_403_FORBIDDEN
+            #     )
 
             user_id = user_repository.insert(
                 x_id=user_x_id,
@@ -193,6 +203,7 @@ async def link_discord_endpoint(
     with discord_sso:
         response = await discord_sso.get_login_redirect(state=str(user.user_id))
         return LinkDiscordResponse(redirect_url=response.headers["location"])
+
 
 @router.get("/discord/callback")
 async def discord_callback(request: Request):

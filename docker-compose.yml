@@ -9,6 +9,7 @@ services:
     volumes:
       - ./logs:/home/appuser/logs
       - ./prometheus:/home/appuser/prometheus
+      - ./data:/home/appuser/data
     command: gunicorn --log-level debug --timeout 300 --bind 0.0.0.0:3000 --worker-class=uvicorn.workers.UvicornWorker --workers=2 app:app
     expose:
       - "3000"
