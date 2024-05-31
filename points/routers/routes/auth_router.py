@@ -107,8 +107,8 @@ async def twitter_callback(request: Request):
         whitelist_repository = WhitelistRepository()
         if not whitelist_repository.is_whitelisted(user_x_id):
             return RedirectResponse(
-                url=settings.FRONTEND_AUTH_CALLBACK_URL + "?" + urlencode({"callback": "no_access"}),
-                status_code=status.HTTP_403_FORBIDDEN
+                url=settings.FRONTEND_AUTH_CALLBACK_URL + "?" + urlencode({"error": "no_access"}),
+                status_code=status.HTTP_302_FOUND
             )
 
         user_x_name = twitter_user["data"]["username"]
@@ -127,7 +127,7 @@ async def twitter_callback(request: Request):
             # if (now - created_at_dt).days < MIN_TWITTER_ACCOUNT_AGE_DAYS:
             #     return RedirectResponse(
             #         url=settings.FRONTEND_AUTH_CALLBACK_URL + "?" + urlencode({"error": "account too new"}),
-            #         status_code=status.HTTP_403_FORBIDDEN
+            #         status_code=status.HTTP_302_FOUND
             #     )
 
             user_id = user_repository.insert(
@@ -153,7 +153,7 @@ async def twitter_callback(request: Request):
             logger.error(f"Failed to save user twitter access token, user_id={user_id}", exc_info=True)
             return RedirectResponse(
                 url=settings.FRONTEND_AUTH_CALLBACK_URL + "?" + urlencode({"error": "unexpected error"}),
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status_code=status.HTTP_302_FOUND
             )
 
         access_token: str = access_token_service.create_access_token(user_x_id)
