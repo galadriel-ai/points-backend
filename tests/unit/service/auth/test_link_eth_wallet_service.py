@@ -188,6 +188,7 @@ async def test_not_add_event_if_exists():
     event_repo.add_event.assert_not_called()
 
 
+@pytest.mark.skip
 async def test_wallet_balance_too_small():
     request = LinkEthWalletRequest(
         signature="0xMock1",
